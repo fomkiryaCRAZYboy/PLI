@@ -1,0 +1,11 @@
+var n = 5;
+var result = 1;
+var i = 1;
+
+while (i <= n) {
+    result = result * i;
+    i = i + 1;
+}
+
+print("Factorial of ", n, " is ", result);
+end;

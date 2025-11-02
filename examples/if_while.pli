@@ -1,0 +1,12 @@
+var count = 0;
+var max = 5;
+
+while (count < max) {
+    if (count % 2 == 0) {
+        print(count, " - четное");
+    } else {
+        print(count, " - нечетное");
+    }
+    count = count + 1;
+}
+end;

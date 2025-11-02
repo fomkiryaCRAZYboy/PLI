@@ -1,0 +1,22 @@
+program = {statement} "end" ";";
+
+statement = declaration | assignment | if_statement | while_statement | print_statement | read_statement;
+
+declaration = "var" identifier "=" expression ";";
+assignment = identifier "=" expression ";";
+if_statement = "if" "(" expression ")" "{" {statement} "}" ["else" "{" {statement} "}"];
+while_statement = "while" "(" expression ")" "{" {statement} "}";
+print_statement = "print" "(" expression { "," expression } ")" ";";
+read_statement = "read" "(" identifier ")" ";";
+
+expression = comparison { ("and" | "or") comparison };
+comparison = term { ("==" | "!=" | "<" | ">" | "<=" | ">=") term };
+term = factor { ("+" | "-") factor };
+factor = unary { ("*" | "/") unary };
+unary = ["-" | "not"] primary;
+primary = number | string | boolean | identifier | "(" expression ")";
+
+identifier = letter {letter | digit | "_"};
+number = [ "-" ] digit {digit} [ "." digit {digit} ];
+string = '"' {all_characters} '"';
+boolean = "true" | "false";
