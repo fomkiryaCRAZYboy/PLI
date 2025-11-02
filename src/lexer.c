@@ -8,7 +8,7 @@
 /* create token directly in the tokens stream */
 F_CREATE_TOKEN_RESULT create_token(TOKEN_TYPE token_type, char* token_text, TOKEN* tokens_stream, int* tokens_count_in_stream)
 {
-    if(tokens_count_in_stream >= MAX_TOKENS_COUNT_IN_BLOCK - 1) 
+    if(*tokens_count_in_stream >= MAX_TOKENS_COUNT_IN_BLOCK - 1) 
         return STREAM_OVERFLOW_ERROR ;
 
     tokens_stream[*tokens_count_in_stream].type_token = token_type ;
@@ -56,12 +56,10 @@ F_TOKENIZE_RESULT tokenize(char* line)
 
             if(create_token (TOKEN_NUMBER, token_text, tokens_stream, &tokens_count_in_stream) != SUCCESS_TOKEN_CREATION)
                 return TOKEN_CREATION_ERROR ;
-
-            
         }
 
     }
 
     
-    return tokens_stream ;
+    return SUCCESS_TOKENIZE ;
 }
