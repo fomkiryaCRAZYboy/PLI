@@ -1,0 +1,13 @@
+{
+  "create_token": [
+    "0:SUCCESS_TOKEN_CREATION",
+    "1:STREAM_OVERFLOW_ERROR"
+  ],
+  "tokenize": [
+    "0:SUCCESS_TOKENIZE",
+    "1:STREAM_CREATION_ERROR",
+    "2:TOKEN_CREATION_ERROR",
+    "3:BIG_NUMBER_ERROR",
+    "4:s"
+  ]
+}
