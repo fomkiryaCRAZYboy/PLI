@@ -4,38 +4,46 @@
 #include <string.h>
 
 static int errors_count = 0;
-ERR_CODE errors_array[MAX_FAILS];
+err_code errors_array[MAX_FAILS];
 
-int get_all_funcs()
+/* returns the error code description */
+char* decode_err(int error_code)
 {
+    #ifdef  DECODE
+    #undef  DECODE
+    #endif
 
+    switch(error_code)
+    {
+        #define DECODE(code, description) case code : return description ;
+        ERRORS
+        #undef  DECODE
+
+        default                                     : return "UnknownError" ;
+    } 
 }
 
-char* decode_err(int error_code, char* function_name)
-{
-    
-}
 
-void add_err_code(int err_code, int line_num, char* function_name)
+void add_err_code(int err_code, int line_num)
 {   
     if(errors_count > MAX_FAILS - 1)
         return;
 
-    if(!function_name)
-        function_name = "unknown function";
-
     errors_array[errors_count].err_code = err_code;
     errors_array[errors_count].line_num = line_num;
-    strncpy(errors_array[errors_count].function_name, function_name, sizeof(errors_array[errors_count].function_name));
 
     ++errors_count;
 }
 
+/* it will be called by atexit() */
 void print_errors()
 {
     int i;
     for(i = 0; i < errors_count; ++i)
     {
-        printf("ERROR:");
+        printf("Error <%hd> in line <%hd>: %s\n",
+               errors_array[i].err_code, 
+               errors_array[i].line_num, 
+               decode_err(errors_array[i].err_code));
     }
 }

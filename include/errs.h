@@ -7,7 +7,7 @@
 
 
 #define ERRORS \
-        DECODE(SUCCESS, "Success") \
+        DECODE(SUCCESS,                               "Success") \
         \
         DECODE(CREATE_TOKEN_func_STREAM_OVERFLOW_ERR, "TokenStreamOverflowError") \
         \
@@ -19,6 +19,10 @@
 /* generate enum for all kinds of errors */
 typedef enum
 {
+    #ifdef  DECODE
+    #undef  DECODE
+    #endif
+
     #define DECODE(code, description) code,
     ERRORS
     #undef  DECODE
@@ -26,24 +30,18 @@ typedef enum
 } 
 f_result ;
 
-
-    #if 0
 /*  the structure stores the error 
     code and the function that 
     terminated with this error */
-typedef struct err_code
+typedef struct 
 {
-    int  err_code;
-    int  line_num;
-    char function_name[32];
+    short  err_code;
+    short  line_num;
 }
-ERR_CODE ;
-    #endif
+err_code ;
 
-void add_err_code(int error_code, int line_num,char* function_name);
+void add_err_code(int error_code, int line_num);
 void print_errors();
-char* decode_err(int error_code,char* function_name);
-
-int get_all_funcs();
+char* decode_err(int error_code);
 
 #endif /* ERR_H */
