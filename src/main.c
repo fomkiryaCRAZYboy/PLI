@@ -15,13 +15,20 @@ int main() {
                                     nothing will happen 
                                 */
 
-    char* a = pli_alloc(10);
-    char* b = pli_alloc(10); 
-    char* c = pli_alloc(10);
+    char program[] = "77ю";
     
-    strcpy(a, "A");
-    strcpy(b, "B");
-    strcpy(c, "C");
+    int actual_tokens_count = 0;
+    int* tokens_count = &actual_tokens_count;
+    TOKEN* stream;
+
+    stream = tokenize(program, tokens_count);
+    if(!stream)
+    {
+        add_err_code(MAIN_func_TOKENIZE_ERROR, 00000);
+        exit(EXIT_FAILURE);
+    }
+
+    debug_print_stream(stream, tokens_count);
     
     exit(EXIT_SUCCESS);
 }

@@ -5,52 +5,61 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <stdio.h>
 #include <string.h>
 
-bool is_float_num(char* line_ptr)
+char* get_number_token(char** line_ptr)
 {
-    int total_digits = 0;
-    int meaningful_digits = 0;
-    bool found_point = false;
-    bool found_nonzero = false;
-    int i = 0;
-    
-    const int MAX_MEANINGFUL_DIGITS = 15;
-    
-    if (line_ptr[i] == '+' || line_ptr[i] == '-') {
-        i++;
-    }
-    
-    while (isdigit(line_ptr[i]) && total_digits < MAX_FLOAT_SIZE) {
-        if (line_ptr[i] != '0') {
-            found_nonzero = true;
-        }
-        if (found_nonzero && meaningful_digits < MAX_MEANINGFUL_DIGITS) {
-            meaningful_digits++;
-        }
-        total_digits++;
-        i++;
-    }
-    
-    if (line_ptr[i] == '.') {
-        found_point = true;
-        i++;
-        
-        while (isdigit(line_ptr[i]) && total_digits < MAX_FLOAT_SIZE) {
-            if (meaningful_digits < MAX_MEANINGFUL_DIGITS) {
-                meaningful_digits++;
-                found_nonzero = true; 
-            }
-            total_digits++;
-            i++;
-        }
-    }
-    
-    return (found_point && found_nonzero && total_digits <= MAX_FLOAT_SIZE);
-}
+    char* current = *line_ptr;
 
-char* get_number_token(char* line_ptr)
-{
+    char* num_token = pli_alloc(MAX_NUM_SIZE + 1);
+    if(!num_token)
+    {
+        add_err_code(GET_NUMBER_TOKEN_func_ALLOC_ERROR, 000000);
+        return NULL ;
+    }
+
+    int iter = 0;
+
+    if (*current == '+' || *current == '-')
+    {
+        num_token[iter++] = *current++;
+    }
+
+    while(isdigit(*current) && iter < MAX_NUM_SIZE)
+    {
+        num_token[iter++] = *current++;
+    }
+
+    if (*current == '.' && iter < MAX_NUM_SIZE - 1) {
+        num_token[iter++] = *current++;
+        
+        while(isdigit(*current) && iter < MAX_NUM_SIZE)
+        {
+            num_token[iter++] = *current++;
+        }
+    }
+
+    if(iter == MAX_NUM_SIZE && (isdigit(*current) || *current == '.'))
+    {
+        add_err_code(GET_NUMBER_TOKEN_func_BIG_NUMBER_ERROR, 00000);
+        pli_free(num_token);
+
+        return NULL;
+    }
+
+    num_token[iter] = '\0';
+    
+    if (iter == 0 || (iter == 1 && (num_token[0] == '+' || num_token[0] == '-' || num_token[0] == '.'))) 
+    {
+        add_err_code(GET_NUMBER_TOKEN_func_INVALID_NUMBER, 00000);
+        pli_free(num_token);
+
+        return NULL;
+    }
+
+    *line_ptr = current;
+    return num_token;
 }
 
 /* create token directly in the tokens stream */
@@ -58,11 +67,39 @@ f_result create_token(TOKEN_TYPE token_type, char* token_text, TOKEN* tokens_str
 {
     if(*tokens_count_in_stream >= MAX_TOKENS_COUNT_IN_BLOCK - 1) 
     {
-        add_err_code(CREATE_TOKEN_func_STREAM_OVERFLOW_ERR, 0000000);
-        return CREATE_TOKEN_func_STREAM_OVERFLOW_ERR ;
+        add_err_code(CREATE_TOKEN_func_STREAM_OVERFLOW_ERROR, 0000000);
+        return CREATE_TOKEN_func_STREAM_OVERFLOW_ERROR ;
     }    
     tokens_stream[*tokens_count_in_stream].type_token = token_type ;
-    strncpy(tokens_stream[*tokens_count_in_stream].text_token, token_text, MAX_TOKEN_TEXT_SIZE) ;
+
+    if(token_type == unknown_token)
+    {
+        strncpy(tokens_stream[*tokens_count_in_stream].text_token.text, token_text, MAX_TOKEN_TEXT_SIZE) ;
+    }
+    
+    /* sep_and_op_text */
+    else if(token_type >= math_op_token_mult)
+    {
+        strncpy(tokens_stream[*tokens_count_in_stream].text_token.sep_and_op_text, token_text, MAX_SEP_AND_OP_SIZE) ;
+    }
+
+    /* bool_text */
+    else if(token_type == bool_token_t || token_type == bool_token_f)
+    {
+        strncpy(tokens_stream[*tokens_count_in_stream].text_token.bool_text, token_text, MAX_BOOL_SIZE) ;
+    }
+
+    /* num_text */
+    else if(token_type == num_token)
+    {
+        strncpy(tokens_stream[*tokens_count_in_stream].text_token.num_text, token_text, MAX_NUM_SIZE) ;
+    }
+
+    /* strings, var names & kw`s*/
+    else if(token_type < 12)
+    {
+        strncpy(tokens_stream[*tokens_count_in_stream].text_token.text, token_text, MAX_TOKEN_TEXT_SIZE) ;
+    }
 
     ++(*tokens_count_in_stream);
 
@@ -74,24 +111,24 @@ f_result create_token(TOKEN_TYPE token_type, char* token_text, TOKEN* tokens_str
 main tokenize function that 
 defines tokens in block of code.
 */
-f_result tokenize(char* block)
+TOKEN* tokenize(char* block, int* tokens_count)
 {
-    TOKEN* tokens_stream = NULL;
+    TOKEN* tokens_stream;
     int iterator = 0;
-    int tokens_count_in_stream = 0;
-    char token_text[MAX_TOKEN_TEXT_SIZE];
-    char* line_ptr = NULL;
+    char* line_ptr;
 
     tokens_stream = pli_alloc (MAX_TOKENS_COUNT_IN_BLOCK * sizeof(TOKEN)) ; 
     if(!tokens_stream) 
     {
-        add_err_code(TOKENIZE_func_STREAM_CREATION_ERROR, 0000000000);
-        return TOKENIZE_func_STREAM_CREATION_ERROR ;
+        add_err_code(TOKENIZE_func_STREAM_CREATION_ERROR, 00000000);
+        return NULL ;
     }
 
     iterator = 0;
-    tokens_count_in_stream = 0;
     line_ptr = block;
+
+    *tokens_count = 0;
+
     
     /* main tokenize cycle */
     while(line_ptr)
@@ -99,30 +136,35 @@ f_result tokenize(char* block)
         while(isspace (*line_ptr)) 
             line_ptr++ ;
 
-        if(isdigit (*line_ptr)) 
+        /* end of code block */
+        if(*line_ptr == '\0') break; 
+
+        /* starts from '+'/'-'/digit --> number*/    
+        if(isdigit (*line_ptr) || *line_ptr == '+' || *line_ptr == '-') 
         {
-            get_number_token(line_ptr);
-            while(isdigit (*line_ptr) && iterator < MAX_NUMBER_DIGITS) 
+            char* text_token = get_number_token(&(line_ptr));
+            if(!text_token)
             {
-                token_text[iterator++] = *line_ptr++ ;
+                add_err_code(TOKENIZE_func_GET_NUMBER_TOKEN_ERROR, 000000);
+                pli_free(tokens_stream);
+
+                return NULL ;
             }
-            
-            if(iterator < MAX_NUMBER_DIGITS)
-                token_text[iterator] = '\0' ;
-            else
+
+            if(create_token(num_token, text_token, tokens_stream, tokens_count) != SUCCESS)
             {
-                add_err_code(TOKENIZE_func_BIG_NUMBER_ERROR, 0000000);
-                return TOKENIZE_func_BIG_NUMBER_ERROR ;
-            }    
-            if(create_token (num_token, token_text, tokens_stream, &tokens_count_in_stream) != SUCCESS)
-            {
-                add_err_code(TOKENIZE_func_TOKEN_CREATION_ERROR, 000000);
-                return TOKENIZE_func_TOKEN_CREATION_ERROR ;
+                add_err_code(TOKENIZE_func_NUM_TOKEN_CREATION_ERROR, 000000);
+
+                pli_free(tokens_stream);
+                pli_free(text_token);
+
+                return NULL ;
             }
+
+            pli_free(text_token);
         }
 
     }
 
-    
-    return SUCCESS ;
+    return tokens_stream ;
 }

@@ -10,6 +10,7 @@ void* pli_alloc(size_t size)
     MEMORY_BLOCK* block = malloc (sizeof(MEMORY_BLOCK));
     if (!block)
         return NULL ; 
+    
 
     void* ptr = malloc (size);
     if (!ptr)

@@ -7,14 +7,21 @@
 
 
 #define ERRORS \
-        DECODE(SUCCESS,                               "Success") \
+        DECODE(SUCCESS,                                 "Success") \
         \
-        DECODE(CREATE_TOKEN_func_STREAM_OVERFLOW_ERR, "TokenStreamOverflowError") \
+        DECODE(MAIN_func_TOKENIZE_ERROR,                "TokenizeError") \
         \
-        DECODE(TOKENIZE_func_STREAM_CREATION_ERROR,   "StreamCreationError") \
-        DECODE(TOKENIZE_func_TOKEN_CREATION_ERROR,    "TokenCreationError") \
-        DECODE(TOKENIZE_func_BIG_NUMBER_ERROR,        "BigNumberError") \
+        DECODE(CREATE_TOKEN_func_STREAM_OVERFLOW_ERROR, "TokenStreamOverflowError") \
+        \
+        DECODE(TOKENIZE_func_STREAM_CREATION_ERROR,     "StreamCreationError") \
+        DECODE(TOKENIZE_func_GET_NUMBER_TOKEN_ERROR,    "GetNumberTokenError") \
+        DECODE(TOKENIZE_func_NUM_TOKEN_CREATION_ERROR,  "NumTokenCreationError") \
+        \
+        DECODE(GET_NUMBER_TOKEN_func_ALLOC_ERROR,       "NumberTokenAllocError") \
+        DECODE(GET_NUMBER_TOKEN_func_BIG_NUMBER_ERROR,  "BigNumberError") \
+        DECODE(GET_NUMBER_TOKEN_func_INVALID_NUMBER,    "InvalidNumberError") 
 
+        
 
 /* generate enum for all kinds of errors */
 typedef enum

@@ -5,9 +5,8 @@
 
 /* token text size for different types */
 #define MAX_SEP_AND_OP_SIZE          3
-#define MAX_BOOL_SIZE                7
-#define MAX_FLOAT_SIZE               30      
-#define MAX_INT_SIZE                 20       
+#define MAX_BOOL_SIZE                6
+#define MAX_NUM_SIZE                 30      
 #define MAX_TOKEN_TEXT_SIZE          64     /* Если максимальная длна текста токена 64,
                                              то необходимо сделать макс. длину имени переменной 
                                               и макс. длину для string 64 */
@@ -19,6 +18,7 @@
 typedef enum 
 {
     /* --- KEYWORDS (reserved words) --- */
+    kw_token_var  ,     /* 'var'   - variable declare keyword */
     kw_token_if   ,     /* 'if'    - conditional statement */
     kw_token_else ,     /* 'else'  - alternative branch */
     kw_token_while,     /* 'while' - loop statement */
@@ -33,8 +33,8 @@ typedef enum
     iden_token    ,      /* identifier - variable, e.g.: 'x', 'count', 'my_var' */
 
     /* --- LITERALS --- */
-    num_token   ,        /* number literal, e.g. : '42', '3.14', '-10' */
     str_token   ,        /* string literal, e.g. : '"hello"', '"world"' */
+    num_token   ,        /* number literal, e.g. : '42', '3.14', '-10' */
     bool_token_t,        /* boolean true, e.g.   : 'true' */
     bool_token_f,        /* boolean false, e.g.  : 'false' */
     
@@ -80,8 +80,7 @@ TOKEN_TYPE ;
 typedef union token_value
 {
     char text            [MAX_TOKEN_TEXT_SIZE];     /* For identifiers, strings, keywords */
-    char int_text        [MAX_INT_SIZE];            /* For integer numbers */
-    char float_text      [MAX_FLOAT_SIZE];          /* For floating point numbers */
+    char num_text        [MAX_NUM_SIZE];            /* For integer and float numbers */
     char bool_text       [MAX_BOOL_SIZE];           /* For boolean values */
     char sep_and_op_text [MAX_SEP_AND_OP_SIZE];     /* For separators and math/comp operations */
 } 
@@ -90,13 +89,19 @@ TOKEN_TEXT ;
 /*  */
 typedef struct token
 {
-    TOKEN_TEXT value_token ;
+    TOKEN_TEXT text_token ;
     TOKEN_TYPE type_token  ;
 } 
 TOKEN ;
 
 /* (block of code) */
-f_result tokenize(char* block) ;
+TOKEN* tokenize(char* block, int* tokens_count) ;
+
 f_result create_token(TOKEN_TYPE token_type, char* token_text, TOKEN* tokens_stream, int* tokens_count_in_stream) ;
+char* get_number_token(char** line_ptr);
+
+/* debug */
+void debug_print_stream(TOKEN* stream, int* tokens_count);
+const char* get_type_of_token(TOKEN_TYPE type);
 
 #endif /* LEXER_H */
