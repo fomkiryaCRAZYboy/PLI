@@ -19,7 +19,7 @@ typedef struct memory_block
 MEMORY_BLOCK ;
 
 void* pli_alloc(size_t size) ;
-void emergeny_cleanup() ;
+void emergency_cleanup() ;
 FREE_RES pli_free(void* ptr) ;
 
 #endif /* BASE_H */

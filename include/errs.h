@@ -15,13 +15,14 @@
         \
         DECODE(TOKENIZE_func_STREAM_CREATION_ERROR,     "StreamCreationError") \
         DECODE(TOKENIZE_func_GET_NUMBER_TOKEN_ERROR,    "GetNumberTokenError") \
-        DECODE(TOKENIZE_func_NUM_TOKEN_CREATION_ERROR,  "NumTokenCreationError") \
+        DECODE(TOKENIZE_func_NUM_TOKEN_CREATION_ERROR,  "NumberTokenCreationError") \
         \
         DECODE(GET_NUMBER_TOKEN_func_ALLOC_ERROR,       "NumberTokenAllocError") \
         DECODE(GET_NUMBER_TOKEN_func_BIG_NUMBER_ERROR,  "BigNumberError") \
-        DECODE(GET_NUMBER_TOKEN_func_INVALID_NUMBER,    "InvalidNumberError") 
-
-        
+        DECODE(GET_NUMBER_TOKEN_func_INVALID_NUMBER,    "InvalidNumberError") \
+        \
+        DECODE(GET_IDEN_TOKEN_func_ALLOC_ERROR,         "IdentifierTokenAllocError") \
+        DECODE(GET_IDEN_TOKEN_func_INVAILD_IDENTIFIER,  "InvalidIdentifierError")
 
 /* generate enum for all kinds of errors */
 typedef enum

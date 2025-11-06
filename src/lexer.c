@@ -12,8 +12,8 @@ char* get_number_token(char** line_ptr, int current_line)
 {
     char* current = *line_ptr;
 
-    char* num_token = pli_alloc(MAX_NUM_SIZE + 1);
-    if(!num_token)
+    char* number_token = pli_alloc(MAX_NUM_SIZE + 1);
+    if(!number_token)
     {
         add_err_code(GET_NUMBER_TOKEN_func_ALLOC_ERROR, current_line);
         return NULL ;
@@ -23,43 +23,66 @@ char* get_number_token(char** line_ptr, int current_line)
 
     if (*current == '+' || *current == '-')
     {
-        num_token[iter++] = *current++;
+        number_token[iter++] = *current++;
     }
 
     while(isdigit(*current) && iter < MAX_NUM_SIZE)
     {
-        num_token[iter++] = *current++;
+        number_token[iter++] = *current++;
     }
 
     if (*current == '.' && iter < MAX_NUM_SIZE - 1) {
-        num_token[iter++] = *current++;
+        number_token[iter++] = *current++;
         
         while(isdigit(*current) && iter < MAX_NUM_SIZE)
         {
-            num_token[iter++] = *current++;
+            number_token[iter++] = *current++;
         }
     }
 
     if(iter == MAX_NUM_SIZE && (isdigit(*current) || *current == '.'))
     {
         add_err_code(GET_NUMBER_TOKEN_func_BIG_NUMBER_ERROR, current_line);
-        pli_free(num_token);
+        pli_free(number_token);
 
         return NULL;
     }
 
-    num_token[iter] = '\0';
+    number_token[iter] = '\0';
     
-    if (iter == 0 || (iter == 1 && (num_token[0] == '+' || num_token[0] == '-' || num_token[0] == '.'))) 
+    if (iter == 0 || (iter == 1 && (number_token[0] == '+' || number_token[0] == '-' || number_token[0] == '.'))) 
     {
         add_err_code(GET_NUMBER_TOKEN_func_INVALID_NUMBER, current_line);
-        pli_free(num_token);
+        pli_free(number_token);
 
         return NULL;
     }
 
     *line_ptr = current;
-    return num_token;
+    return number_token;
+}
+
+char* get_iden_token(char** line_ptr, int current_line)
+{   
+    char* current = *line_ptr;
+
+    char* identifier_token = pli_alloc(MAX_TOKEN_TEXT_SIZE + 1);
+    if(!identifier_token)
+    {
+        add_err_code(GET_IDEN_TOKEN_func_ALLOC_ERROR, current_line);
+        return NULL ;
+    }
+
+    /* '_'/'__' - invalid identifier name */
+    if(*current == '_' && !isalpha(*(current + 1)))
+    {
+        //add_err_code()
+    }
+
+    while(isalpha(*current) || )
+
+    *line_ptr = current;
+    return identifier_token;
 }
 
 /* create token directly in the tokens stream */
@@ -137,9 +160,11 @@ TOKEN_STREAM* tokenize(char* block)
         }
 
         /* end of code block */
-        if(*line_ptr == '\0') break; 
+        if(*line_ptr == '\0') 
+            break; 
 
-        /* starts from '+'/'-'/digit --> number*/    
+        /* starts from '+'/'-'/digit --> number*/  
+        /* numbers handling */  
         if(isdigit (*line_ptr) || *line_ptr == '+' || *line_ptr == '-') 
         {
             char* text_token = get_number_token(&(line_ptr), current_line);
@@ -164,6 +189,17 @@ TOKEN_STREAM* tokenize(char* block)
             }
 
             pli_free(text_token);
+        }
+
+        /* true/_name/print */
+        /* bool values/identifers/keywords handling */
+        if(isalpha (*line_ptr) || *line_ptr == '_')
+        {
+            /* getting variable name */
+            if(*line_ptr == '_')
+            {
+
+            }
         }
 
         ++line_ptr;

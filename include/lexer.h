@@ -109,7 +109,8 @@ TOKEN_STREAM ;
 TOKEN_STREAM* tokenize(char* block) ;
 
 f_result create_token(TOKEN_TYPE token_type, char* token_text, TOKEN_STREAM* stream, int line_number) ;
-char* get_number_token(char** line_ptr, int line_number);
+char* get_number_token(char** line_ptr, int current_line);
+char* get_iden_token(char** line_ptr, int current_line);
 
 /* debug */
 void debug_print_stream(TOKEN_STREAM* stream);

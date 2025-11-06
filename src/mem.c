@@ -52,7 +52,7 @@ FREE_RES pli_free(void* ptr)
 }
 
 /* clearing all memory */
-void emergeny_cleanup() 
+void emergency_cleanup() 
 {
     while (memory_chain)
     {

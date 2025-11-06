@@ -13,7 +13,7 @@ int main() {
                                     If there are no errors, 
                                     the output will be empty.     
                                 */
-    atexit (emergeny_cleanup);  /* 
+    atexit (emergency_cleanup);  /* 
                                     If the memory is not occupied, 
                                     nothing will happen 
                                 */
