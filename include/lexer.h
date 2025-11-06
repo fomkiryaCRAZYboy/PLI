@@ -2,6 +2,7 @@
 #define LEXER_H
 
 #include "errs.h"
+#include <stddef.h>
 
 /* token text size for different types */
 #define MAX_SEP_AND_OP_SIZE          3
@@ -86,22 +87,32 @@ typedef union token_value
 } 
 TOKEN_TEXT ;
 
-/*  */
+/* Token structure */
 typedef struct token
 {
     TOKEN_TEXT text_token ;
     TOKEN_TYPE type_token  ;
+    int line_number ;        /* Line number where token was found (1-based) */
 } 
 TOKEN ;
 
-/* (block of code) */
-TOKEN* tokenize(char* block, int* tokens_count) ;
+/* Token stream structure - encapsulates token array with metadata */
+typedef struct token_stream
+{
+    TOKEN* tokens ;           /* Array of tokens */
+    size_t count ;            /* Number of tokens in stream */
+    int current_line ;        /* Current line number being processed */
+} 
+TOKEN_STREAM ;
 
-f_result create_token(TOKEN_TYPE token_type, char* token_text, TOKEN* tokens_stream, int* tokens_count_in_stream) ;
-char* get_number_token(char** line_ptr);
+/* (block of code) */
+TOKEN_STREAM* tokenize(char* block) ;
+
+f_result create_token(TOKEN_TYPE token_type, char* token_text, TOKEN_STREAM* stream, int line_number) ;
+char* get_number_token(char** line_ptr, int line_number);
 
 /* debug */
-void debug_print_stream(TOKEN* stream, int* tokens_count);
+void debug_print_stream(TOKEN_STREAM* stream);
 const char* get_type_of_token(TOKEN_TYPE type);
 
 #endif /* LEXER_H */

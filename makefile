@@ -10,6 +10,9 @@ SOURCES = $(wildcard $(SRC_DIR)/*.c)
 PLI: $(SOURCES)
 	$(CC) $(SOURCES) -o $(BIN_DIR)/pli -Iinclude
 
+run:
+	./$(BIN_DIR)/pli
+
 PLI_debug: $(SOURCES)
 	$(CC) $(SOURCES) -g -O0 -Wall -Wextra -o $(BIN_DIR)/pli_debug -Iinclude
 

@@ -1,0 +1,74 @@
+{
+  "decode_err": {
+    "name": "decode_err",
+    "return_type": "char*",
+    "file": "./src/err.c",
+    "line": 10
+  },
+  "add_err_code": {
+    "name": "add_err_code",
+    "return_type": "void",
+    "file": "./src/err.c",
+    "line": 27
+  },
+  "print_errors": {
+    "name": "print_errors",
+    "return_type": "void",
+    "file": "./src/err.c",
+    "line": 39
+  },
+  "get_type_of_token": {
+    "name": "get_type_of_token",
+    "return_type": "const char*",
+    "file": "./src/lexer_debug.c",
+    "line": 4
+  },
+  "debug_print_stream": {
+    "name": "debug_print_stream",
+    "return_type": "void",
+    "file": "./src/lexer_debug.c",
+    "line": 60
+  },
+  "main": {
+    "name": "main",
+    "return_type": "int",
+    "file": "./src/main.c",
+    "line": 11
+  },
+  "get_number_token": {
+    "name": "get_number_token",
+    "return_type": "char*",
+    "file": "./src/lexer.c",
+    "line": 11
+  },
+  "create_token": {
+    "name": "create_token",
+    "return_type": "f_result (typedef)",
+    "file": "./src/lexer.c",
+    "line": 66
+  },
+  "tokenize": {
+    "name": "tokenize",
+    "return_type": "TOKEN_STREAM* (typedef)",
+    "file": "./src/lexer.c",
+    "line": 112
+  },
+  "pli_alloc": {
+    "name": "pli_alloc",
+    "return_type": "void*",
+    "file": "./src/mem.c",
+    "line": 8
+  },
+  "pli_free": {
+    "name": "pli_free",
+    "return_type": "FREE_RES (typedef)",
+    "file": "./src/mem.c",
+    "line": 29
+  },
+  "emergeny_cleanup": {
+    "name": "emergeny_cleanup",
+    "return_type": "void",
+    "file": "./src/mem.c",
+    "line": 55
+  }
+}

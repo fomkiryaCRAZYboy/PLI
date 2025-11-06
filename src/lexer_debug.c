@@ -57,19 +57,22 @@ const char* get_type_of_token(TOKEN_TYPE type) {
     }
 }
 
-void debug_print_stream(TOKEN* stream, int* tokens_count)
+void debug_print_stream(TOKEN_STREAM* stream)
 {
     printf("---------------------\n");
-    printf("tokens_count = %d\n", *tokens_count);
+    printf("tokens_count = %zu\n", stream->count);
+    printf("current_line = %d\n", stream->current_line);
     printf("---------------------\n");
-    for(int i = 0; i < *tokens_count; i++){
-        if (stream[i].type_token == unknown_token || stream[i].type_token < 12)
-            printf("[%s](%s), ", get_type_of_token(stream[i].type_token), stream[i].text_token.text);
-        else if (stream[i].type_token >= math_op_token_mult)
-            printf("[%s](%s), ", get_type_of_token(stream[i].type_token), stream[i].text_token.sep_and_op_text);        
-        else if (stream[i].type_token == bool_token_f || stream[i].type_token == bool_token_t)
-            printf("[%s](%s), ", get_type_of_token(stream[i].type_token), stream[i].text_token.bool_text);     
+    for(size_t i = 0; i < stream->count; i++){
+        TOKEN* token = &stream->tokens[i];
+        if (token->type_token == unknown_token || token->type_token <= str_token)
+            printf("[%s](%s)[line:%d], ", get_type_of_token(token->type_token), token->text_token.text, token->line_number);
+        else if (token->type_token >= math_op_token_mult)
+            printf("[%s](%s)[line:%d], ", get_type_of_token(token->type_token), token->text_token.sep_and_op_text, token->line_number);        
+        else if (token->type_token == bool_token_f || token->type_token == bool_token_t)
+            printf("[%s](%s)[line:%d], ", get_type_of_token(token->type_token), token->text_token.bool_text, token->line_number);     
         else
-            printf("[%s](%s), ", get_type_of_token(stream[i].type_token), stream[i].text_token.num_text);     
+            printf("[%s](%s)[line:%d], ", get_type_of_token(token->type_token), token->text_token.num_text, token->line_number);     
     }
+    printf("\n");
 }

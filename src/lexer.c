@@ -8,14 +8,14 @@
 #include <stdio.h>
 #include <string.h>
 
-char* get_number_token(char** line_ptr)
+char* get_number_token(char** line_ptr, int current_line)
 {
     char* current = *line_ptr;
 
     char* num_token = pli_alloc(MAX_NUM_SIZE + 1);
     if(!num_token)
     {
-        add_err_code(GET_NUMBER_TOKEN_func_ALLOC_ERROR, 000000);
+        add_err_code(GET_NUMBER_TOKEN_func_ALLOC_ERROR, current_line);
         return NULL ;
     }
 
@@ -42,7 +42,7 @@ char* get_number_token(char** line_ptr)
 
     if(iter == MAX_NUM_SIZE && (isdigit(*current) || *current == '.'))
     {
-        add_err_code(GET_NUMBER_TOKEN_func_BIG_NUMBER_ERROR, 00000);
+        add_err_code(GET_NUMBER_TOKEN_func_BIG_NUMBER_ERROR, current_line);
         pli_free(num_token);
 
         return NULL;
@@ -52,7 +52,7 @@ char* get_number_token(char** line_ptr)
     
     if (iter == 0 || (iter == 1 && (num_token[0] == '+' || num_token[0] == '-' || num_token[0] == '.'))) 
     {
-        add_err_code(GET_NUMBER_TOKEN_func_INVALID_NUMBER, 00000);
+        add_err_code(GET_NUMBER_TOKEN_func_INVALID_NUMBER, current_line);
         pli_free(num_token);
 
         return NULL;
@@ -63,45 +63,33 @@ char* get_number_token(char** line_ptr)
 }
 
 /* create token directly in the tokens stream */
-f_result create_token(TOKEN_TYPE token_type, char* token_text, TOKEN* tokens_stream, int* tokens_count_in_stream)
+f_result create_token(TOKEN_TYPE token_type, char* token_text, TOKEN_STREAM* stream, int line_number)
 {
-    if(*tokens_count_in_stream >= MAX_TOKENS_COUNT_IN_BLOCK - 1) 
+    if(stream->count >= MAX_TOKENS_COUNT_IN_BLOCK - 1) 
     {
-        add_err_code(CREATE_TOKEN_func_STREAM_OVERFLOW_ERROR, 0000000);
+        add_err_code(CREATE_TOKEN_func_STREAM_OVERFLOW_ERROR, line_number);
         return CREATE_TOKEN_func_STREAM_OVERFLOW_ERROR ;
     }    
-    tokens_stream[*tokens_count_in_stream].type_token = token_type ;
+    stream->tokens[stream->count].type_token = token_type ;
+    stream->tokens[stream->count].line_number = line_number ;
 
-    if(token_type == unknown_token)
-    {
-        strncpy(tokens_stream[*tokens_count_in_stream].text_token.text, token_text, MAX_TOKEN_TEXT_SIZE) ;
-    }
+    /* strings, var names & kw`s*/
+    if(token_type == unknown_token || token_type <= str_token)
+        strncpy(stream->tokens[stream->count].text_token.text, token_text, MAX_TOKEN_TEXT_SIZE) ;
     
     /* sep_and_op_text */
     else if(token_type >= math_op_token_mult)
-    {
-        strncpy(tokens_stream[*tokens_count_in_stream].text_token.sep_and_op_text, token_text, MAX_SEP_AND_OP_SIZE) ;
-    }
+        strncpy(stream->tokens[stream->count].text_token.sep_and_op_text, token_text, MAX_SEP_AND_OP_SIZE) ;
 
     /* bool_text */
     else if(token_type == bool_token_t || token_type == bool_token_f)
-    {
-        strncpy(tokens_stream[*tokens_count_in_stream].text_token.bool_text, token_text, MAX_BOOL_SIZE) ;
-    }
+        strncpy(stream->tokens[stream->count].text_token.bool_text, token_text, MAX_BOOL_SIZE) ;
 
     /* num_text */
     else if(token_type == num_token)
-    {
-        strncpy(tokens_stream[*tokens_count_in_stream].text_token.num_text, token_text, MAX_NUM_SIZE) ;
-    }
+        strncpy(stream->tokens[stream->count].text_token.num_text, token_text, MAX_NUM_SIZE) ;
 
-    /* strings, var names & kw`s*/
-    else if(token_type < 12)
-    {
-        strncpy(tokens_stream[*tokens_count_in_stream].text_token.text, token_text, MAX_TOKEN_TEXT_SIZE) ;
-    }
-
-    ++(*tokens_count_in_stream);
+    ++(stream->count);
 
     return SUCCESS ;
 }
@@ -111,30 +99,42 @@ f_result create_token(TOKEN_TYPE token_type, char* token_text, TOKEN* tokens_str
 main tokenize function that 
 defines tokens in block of code.
 */
-TOKEN* tokenize(char* block, int* tokens_count)
+TOKEN_STREAM* tokenize(char* block)
 {
-    TOKEN* tokens_stream;
-    int iterator = 0;
+    TOKEN_STREAM* stream;
     char* line_ptr;
+    int current_line = 1;
 
-    tokens_stream = pli_alloc (MAX_TOKENS_COUNT_IN_BLOCK * sizeof(TOKEN)) ; 
-    if(!tokens_stream) 
+    stream = pli_alloc(sizeof(TOKEN_STREAM));
+    if(!stream) 
     {
-        add_err_code(TOKENIZE_func_STREAM_CREATION_ERROR, 00000000);
+        add_err_code(TOKENIZE_func_STREAM_CREATION_ERROR, current_line);
         return NULL ;
     }
 
-    iterator = 0;
+    stream->tokens = pli_alloc(MAX_TOKENS_COUNT_IN_BLOCK * sizeof(TOKEN));
+    if(!stream->tokens)
+    {
+        add_err_code(TOKENIZE_func_STREAM_CREATION_ERROR, current_line);
+        pli_free(stream);
+        return NULL;
+    }
+
+    stream->count = 0;
+    stream->current_line = 1;
+
     line_ptr = block;
 
-    *tokens_count = 0;
-
-    
     /* main tokenize cycle */
     while(line_ptr)
     {
-        while(isspace (*line_ptr)) 
-            line_ptr++ ;
+        /* Skip whitespace and track line numbers */
+        while(isspace(*line_ptr))
+        {
+            if(*line_ptr == '\n')
+                current_line++;
+            line_ptr++;
+        }
 
         /* end of code block */
         if(*line_ptr == '\0') break; 
@@ -142,20 +142,22 @@ TOKEN* tokenize(char* block, int* tokens_count)
         /* starts from '+'/'-'/digit --> number*/    
         if(isdigit (*line_ptr) || *line_ptr == '+' || *line_ptr == '-') 
         {
-            char* text_token = get_number_token(&(line_ptr));
+            char* text_token = get_number_token(&(line_ptr), current_line);
             if(!text_token)
             {
-                add_err_code(TOKENIZE_func_GET_NUMBER_TOKEN_ERROR, 000000);
-                pli_free(tokens_stream);
+                add_err_code(TOKENIZE_func_GET_NUMBER_TOKEN_ERROR, current_line);
+                pli_free(stream->tokens);
+                pli_free(stream);
 
                 return NULL ;
             }
 
-            if(create_token(num_token, text_token, tokens_stream, tokens_count) != SUCCESS)
+            if(create_token(num_token, text_token, stream, current_line) != SUCCESS)
             {
-                add_err_code(TOKENIZE_func_NUM_TOKEN_CREATION_ERROR, 000000);
+                add_err_code(TOKENIZE_func_NUM_TOKEN_CREATION_ERROR, current_line);
 
-                pli_free(tokens_stream);
+                pli_free(stream->tokens);
+                pli_free(stream);
                 pli_free(text_token);
 
                 return NULL ;
@@ -164,7 +166,10 @@ TOKEN* tokenize(char* block, int* tokens_count)
             pli_free(text_token);
         }
 
+        ++line_ptr;
+
     }
 
-    return tokens_stream ;
+    stream->current_line = current_line;
+    return stream ;
 }
