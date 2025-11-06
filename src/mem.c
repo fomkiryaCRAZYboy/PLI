@@ -1,4 +1,6 @@
 #include "mem.h"
+#include "errs.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -29,7 +31,7 @@ void* pli_alloc(size_t size)
 FREE_RES pli_free(void* ptr)
 {
     if (!ptr) 
-        return SUCCESS_FREE ;
+        return ;
 
     MEMORY_BLOCK** current = &memory_chain;  
     
@@ -42,13 +44,14 @@ FREE_RES pli_free(void* ptr)
             *current = to_free->prev;
             free(to_free);
 
-            return SUCCESS_FREE ;
+            return ;
         }
 
         current = &(*current)->prev;
     }
     
-    return FAILED_FREE ; /* trying to free untracked pointer */
+    //add_err_code(); ADD_WARNING
+    return ; /* trying to free untracked pointer */
 }
 
 /* clearing all memory */

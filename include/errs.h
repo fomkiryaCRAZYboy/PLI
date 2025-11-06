@@ -5,6 +5,9 @@
 
 #define MAX_FAILS   20
 
+#define WARNINGS \
+        DECODE_w(PLI_FREE_func_UNTRACKED_POINTER,       "TryingToFreeUntrackedPointer") \
+
 
 #define ERRORS \
         DECODE(SUCCESS,                                 "Success") \
@@ -23,6 +26,21 @@
         \
         DECODE(GET_IDEN_TOKEN_func_ALLOC_ERROR,         "IdentifierTokenAllocError") \
         DECODE(GET_IDEN_TOKEN_func_INVAILD_IDENTIFIER,  "InvalidIdentifierError")
+
+/* generate enum for all kinds of warnings */        
+typedef enum
+{
+    #ifdef  DECODE_w
+    #undef  DECODE_w
+    #endif
+
+    NOT_WARNING,
+    #define DECODE_w(code, description) code,
+    WARNINGS
+    #undef  DECODE_w
+    CODES_COUNT
+} 
+warnings ;
 
 /* generate enum for all kinds of errors */
 typedef enum
