@@ -6,7 +6,7 @@
 #define MAX_FAILS   20
 
 #define WARNINGS \
-        DECODE_w(PLI_FREE_func_UNTRACKED_POINTER,       "TryingToFreeUntrackedPointer") \
+        DECODE_w(PLI_FREE_func_UNTRACKED_POINTER,       "TryingToFreeUntrackedPointer")
 
 
 #define ERRORS \
@@ -34,7 +34,7 @@ typedef enum
     #undef  DECODE_w
     #endif
 
-    NOT_WARNING,
+    SUCCESS,
     #define DECODE_w(code, description) code,
     WARNINGS
     #undef  DECODE_w

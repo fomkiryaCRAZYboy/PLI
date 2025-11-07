@@ -6,7 +6,9 @@
 #include <string.h>
 #include <stdlib.h>
 
+#ifdef FILE_INPUT
 #define input_file "test_lexer_numbers/input12.pli"
+#endif
 
 int main() {    
     atexit (print_errors);      /* 
