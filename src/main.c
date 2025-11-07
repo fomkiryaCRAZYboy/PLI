@@ -7,7 +7,7 @@
 #include <stdlib.h>
 
 #ifdef FILE_INPUT
-#define input_file "test_lexer_numbers/input12.pli"
+#define input_file "test_lexer_numbers/input.pli"
 #endif
 
 int main() {    
@@ -56,15 +56,17 @@ int main() {
     program[total_read] = '\0';
 #endif /* FILE_INPUT */
 
+    char* x = malloc(10);
+
     stream = tokenize(program);
     if(!stream)
     {
-        add_err_code(MAIN_func_TOKENIZE_ERROR, 0);
+        add_err_code(MAIN_func_TOKENIZE_ERROR, 0, false);
+        pli_free(x);
         exit(EXIT_FAILURE);
     }
 
     debug_print_stream(stream);
-    
-    
+        
     exit(EXIT_SUCCESS);
 }

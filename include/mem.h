@@ -3,13 +3,6 @@
 
 #include <stddef.h>
 
-typedef enum
-{
-    SUCCESS_FREE ,
-    FAILED_FREE  
-}
-FREE_RES ;
-
 /* chain that linking pointers to allocated memory */
 typedef struct memory_block
 {
@@ -20,6 +13,6 @@ MEMORY_BLOCK ;
 
 void* pli_alloc(size_t size) ;
 void emergency_cleanup() ;
-FREE_RES pli_free(void* ptr) ;
+void pli_free(void* ptr) ;
 
 #endif /* BASE_H */

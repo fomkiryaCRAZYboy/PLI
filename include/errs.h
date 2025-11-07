@@ -2,16 +2,17 @@
 #define ERR_H
 
 #include <stddef.h>
+#include <stdbool.h>
 
 #define MAX_FAILS   20
 
 #define WARNINGS \
+        DECODE_w(SUCCESS_w,                               "Success") \
         DECODE_w(PLI_FREE_func_UNTRACKED_POINTER,       "TryingToFreeUntrackedPointer")
-
+    
 
 #define ERRORS \
         DECODE(SUCCESS,                                 "Success") \
-        \
         DECODE(MAIN_func_TOKENIZE_ERROR,                "TokenizeError") \
         \
         DECODE(CREATE_TOKEN_func_STREAM_OVERFLOW_ERROR, "TokenStreamOverflowError") \
@@ -34,11 +35,10 @@ typedef enum
     #undef  DECODE_w
     #endif
 
-    SUCCESS,
     #define DECODE_w(code, description) code,
     WARNINGS
     #undef  DECODE_w
-    CODES_COUNT
+    WARNINGS_CODES_COUNT
 } 
 warnings ;
 
@@ -52,7 +52,7 @@ typedef enum
     #define DECODE(code, description) code,
     ERRORS
     #undef  DECODE
-    CODES_COUNT
+    ERRORS_CODES_COUNT
 } 
 f_result ;
 
@@ -63,11 +63,12 @@ typedef struct
 {
     short  err_code;
     short  line_num;
+    bool   warning;
 }
 err_code ;
 
-void add_err_code(int error_code, int line_num);
+void add_err_code(int error_code, int line_num, bool warning);
 void print_errors();
-char* decode_err(int error_code);
+char* decode_err(int error_code, bool warning);
 
 #endif /* ERR_H */

@@ -15,7 +15,7 @@ char* get_number_token(char** line_ptr, int current_line)
     char* number_token = pli_alloc(MAX_NUM_SIZE + 1);
     if(!number_token)
     {
-        add_err_code(GET_NUMBER_TOKEN_func_ALLOC_ERROR, current_line);
+        add_err_code(GET_NUMBER_TOKEN_func_ALLOC_ERROR, current_line, false);
         return NULL ;
     }
 
@@ -42,7 +42,7 @@ char* get_number_token(char** line_ptr, int current_line)
 
     if(iter == MAX_NUM_SIZE && (isdigit(*current) || *current == '.'))
     {
-        add_err_code(GET_NUMBER_TOKEN_func_BIG_NUMBER_ERROR, current_line);
+        add_err_code(GET_NUMBER_TOKEN_func_BIG_NUMBER_ERROR, current_line, false);
         pli_free(number_token);
 
         return NULL;
@@ -52,7 +52,7 @@ char* get_number_token(char** line_ptr, int current_line)
     
     if (iter == 0 || (iter == 1 && (number_token[0] == '+' || number_token[0] == '-' || number_token[0] == '.'))) 
     {
-        add_err_code(GET_NUMBER_TOKEN_func_INVALID_NUMBER, current_line);
+        add_err_code(GET_NUMBER_TOKEN_func_INVALID_NUMBER, current_line, false);
         pli_free(number_token);
 
         return NULL;
@@ -62,6 +62,7 @@ char* get_number_token(char** line_ptr, int current_line)
     return number_token;
 }
 
+#if 0
 char* get_iden_token(char** line_ptr, int current_line)
 {   
     char* current = *line_ptr;
@@ -69,7 +70,7 @@ char* get_iden_token(char** line_ptr, int current_line)
     char* identifier_token = pli_alloc(MAX_TOKEN_TEXT_SIZE + 1);
     if(!identifier_token)
     {
-        add_err_code(GET_IDEN_TOKEN_func_ALLOC_ERROR, current_line);
+        add_err_code(GET_IDEN_TOKEN_func_ALLOC_ERROR, current_line, false);
         return NULL ;
     }
 
@@ -84,13 +85,14 @@ char* get_iden_token(char** line_ptr, int current_line)
     *line_ptr = current;
     return identifier_token;
 }
+#endif
 
 /* create token directly in the tokens stream */
 f_result create_token(TOKEN_TYPE token_type, char* token_text, TOKEN_STREAM* stream, int line_number)
 {
     if(stream->count >= MAX_TOKENS_COUNT_IN_BLOCK - 1) 
     {
-        add_err_code(CREATE_TOKEN_func_STREAM_OVERFLOW_ERROR, line_number);
+        add_err_code(CREATE_TOKEN_func_STREAM_OVERFLOW_ERROR, line_number, false);
         return CREATE_TOKEN_func_STREAM_OVERFLOW_ERROR ;
     }    
     stream->tokens[stream->count].type_token = token_type ;
@@ -131,14 +133,14 @@ TOKEN_STREAM* tokenize(char* block)
     stream = pli_alloc(sizeof(TOKEN_STREAM));
     if(!stream) 
     {
-        add_err_code(TOKENIZE_func_STREAM_CREATION_ERROR, current_line);
+        add_err_code(TOKENIZE_func_STREAM_CREATION_ERROR, current_line, false);
         return NULL ;
     }
 
     stream->tokens = pli_alloc(MAX_TOKENS_COUNT_IN_BLOCK * sizeof(TOKEN));
     if(!stream->tokens)
     {
-        add_err_code(TOKENIZE_func_STREAM_CREATION_ERROR, current_line);
+        add_err_code(TOKENIZE_func_STREAM_CREATION_ERROR, current_line, false);
         pli_free(stream);
         return NULL;
     }
@@ -170,7 +172,7 @@ TOKEN_STREAM* tokenize(char* block)
             char* text_token = get_number_token(&(line_ptr), current_line);
             if(!text_token)
             {
-                add_err_code(TOKENIZE_func_GET_NUMBER_TOKEN_ERROR, current_line);
+                add_err_code(TOKENIZE_func_GET_NUMBER_TOKEN_ERROR, current_line, false);
                 pli_free(stream->tokens);
                 pli_free(stream);
 
@@ -179,7 +181,7 @@ TOKEN_STREAM* tokenize(char* block)
 
             if(create_token(num_token, text_token, stream, current_line) != SUCCESS)
             {
-                add_err_code(TOKENIZE_func_NUM_TOKEN_CREATION_ERROR, current_line);
+                add_err_code(TOKENIZE_func_NUM_TOKEN_CREATION_ERROR, current_line, false);
 
                 pli_free(stream->tokens);
                 pli_free(stream);
@@ -191,6 +193,7 @@ TOKEN_STREAM* tokenize(char* block)
             pli_free(text_token);
         }
 
+        #if 0
         /* true/_name/print */
         /* bool values/identifers/keywords handling */
         if(isalpha (*line_ptr) || *line_ptr == '_')
@@ -201,8 +204,9 @@ TOKEN_STREAM* tokenize(char* block)
 
             }
         }
+        #endif
 
-        ++line_ptr;
+        //++line_ptr;
 
     }
 

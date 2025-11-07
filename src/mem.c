@@ -28,7 +28,7 @@ void* pli_alloc(size_t size)
     return ptr ;
 }
 
-FREE_RES pli_free(void* ptr)
+void pli_free(void* ptr)
 {
     if (!ptr) 
         return ;
@@ -50,7 +50,7 @@ FREE_RES pli_free(void* ptr)
         current = &(*current)->prev;
     }
     
-    //add_err_code(); ADD_WARNING
+    add_err_code(PLI_FREE_func_UNTRACKED_POINTER, 0, true);
     return ; /* trying to free untracked pointer */
 }
 

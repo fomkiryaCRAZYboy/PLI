@@ -2,7 +2,6 @@
 
 #include <stdbool.h>
 #include <stdio.h>
-#include <string.h>
 
 static int errors_count = 0;
 err_code errors_array[MAX_FAILS];
@@ -43,13 +42,14 @@ char* decode_err(int error_code, bool warning)
     }
 }
 
-void add_err_code(int err_code, int line_num)
+void add_err_code(int err_code, int line_num, bool warning)
 {   
     if(errors_count > MAX_FAILS - 1)
         return;
 
     errors_array[errors_count].err_code = err_code;
     errors_array[errors_count].line_num = line_num;
+    errors_array[errors_count].warning = warning;
 
     ++errors_count;
 }
@@ -60,9 +60,19 @@ void print_errors()
     int i;
     for(i = 0; i < errors_count; ++i)
     {
-        printf("Error <%hd> in line <%hd>: %s\n",
-               errors_array[i].err_code, 
-               errors_array[i].line_num, 
-               decode_err(errors_array[i].err_code));
+        if(errors_array[i].warning)
+        {
+            printf(">>> Warning <code:%hd> in line %hd: %s\n",
+                   errors_array[i].err_code, 
+                   errors_array[i].line_num, 
+                   decode_err(errors_array[i].err_code, true));
+        }
+        else
+        {
+            printf(">>> Error   <code:%hd> in line %hd: %s\n",
+                   errors_array[i].err_code, 
+                   errors_array[i].line_num, 
+                   decode_err(errors_array[i].err_code, false));
+        }
     }
 }
