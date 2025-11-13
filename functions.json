@@ -9,13 +9,13 @@
     "name": "add_err_code",
     "return_type": "void",
     "file": "./src/err.c",
-    "line": 27
+    "line": 45
   },
   "print_errors": {
     "name": "print_errors",
     "return_type": "void",
     "file": "./src/err.c",
-    "line": 39
+    "line": 58
   },
   "get_type_of_token": {
     "name": "get_type_of_token",
@@ -33,7 +33,7 @@
     "name": "main",
     "return_type": "int",
     "file": "./src/main.c",
-    "line": 11
+    "line": 13
   },
   "get_number_token": {
     "name": "get_number_token",
@@ -41,34 +41,58 @@
     "file": "./src/lexer.c",
     "line": 11
   },
+  "identify_token_type": {
+    "name": "identify_token_type",
+    "return_type": "TOKEN_TYPE (typedef)",
+    "file": "./src/lexer.c",
+    "line": 68
+  },
+  "get_text_token": {
+    "name": "get_text_token",
+    "return_type": "char*",
+    "file": "./src/lexer.c",
+    "line": 116
+  },
   "create_token": {
     "name": "create_token",
     "return_type": "f_result (typedef)",
     "file": "./src/lexer.c",
-    "line": 66
+    "line": 198
+  },
+  "process_text_token": {
+    "name": "process_text_token",
+    "return_type": "static f_result",
+    "file": "./src/lexer.c",
+    "line": 258
   },
   "tokenize": {
     "name": "tokenize",
     "return_type": "TOKEN_STREAM* (typedef)",
     "file": "./src/lexer.c",
-    "line": 112
+    "line": 285
   },
   "pli_alloc": {
     "name": "pli_alloc",
     "return_type": "void*",
     "file": "./src/mem.c",
-    "line": 8
+    "line": 10
   },
   "pli_free": {
     "name": "pli_free",
-    "return_type": "FREE_RES (typedef)",
-    "file": "./src/mem.c",
-    "line": 29
-  },
-  "emergeny_cleanup": {
-    "name": "emergeny_cleanup",
     "return_type": "void",
     "file": "./src/mem.c",
-    "line": 55
+    "line": 31
+  },
+  "emergency_cleanup": {
+    "name": "emergency_cleanup",
+    "return_type": "void",
+    "file": "./src/mem.c",
+    "line": 58
+  },
+  "next_is_undrline": {
+    "name": "next_is_undrline",
+    "return_type": "bool",
+    "file": "./include/lexer.h",
+    "line": 114
   }
 }

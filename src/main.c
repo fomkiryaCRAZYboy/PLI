@@ -7,7 +7,7 @@
 #include <stdlib.h>
 
 #ifdef FILE_INPUT
-#define input_file "test_lexer_numbers/input.pli"
+#define input_file "test_lexer_ids_kws_bools/input6.pli"
 #endif
 
 int main() {    
@@ -60,11 +60,18 @@ int main() {
     if(!stream)
     {
         add_err_code(MAIN_func_TOKENIZE_ERROR, 0, false);
-        pli_free(x);
         exit(EXIT_FAILURE);
     }
 
     debug_print_stream(stream);
+
+    if(stream)
+    {
+        if(stream->tokens)
+            pli_free(stream->tokens);
+
+        pli_free(stream);
+    }
         
     exit(EXIT_SUCCESS);
 }

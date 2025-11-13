@@ -1,0 +1,8 @@
+var myVariable  true
+var anotherVar  false
+if myVariable and anotherVar
+print "test"
+end
+
+
+##success

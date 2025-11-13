@@ -114,6 +114,7 @@ char* get_text_token(char** line_ptr, int current_line);
 
 /* help func */
 bool next_is_undrline(char* p);
+TOKEN_TYPE identify_token_type(char* token_text);
 
 static f_result process_token(
     char* (*get_token_func)(char**, int),
@@ -123,6 +124,12 @@ static f_result process_token(
     TOKEN_STREAM* stream,
     int get_token_error_code,
     int create_token_error_code);
+
+static f_result process_text_token(
+    char** line_ptr,
+    int current_line,
+    TOKEN_STREAM* stream,
+    int error_code);
 
 /* debug */
 void debug_print_stream(TOKEN_STREAM* stream);

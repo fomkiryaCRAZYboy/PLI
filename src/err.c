@@ -62,14 +62,14 @@ void print_errors()
     {
         if(errors_array[i].warning)
         {
-            printf(">>> Warning <code:%hd> in line %hd: %s\n",
+            printf(">>> Warning <code:%2hd> in line %hd: %s\n",
                    errors_array[i].err_code, 
                    errors_array[i].line_num, 
                    decode_err(errors_array[i].err_code, true));
         }
         else
         {
-            printf(">>> Error   <code:%hd> in line %hd: %s\n",
+            printf(">>> Error   <code:%2hd> in line %hd: %s\n",
                    errors_array[i].err_code, 
                    errors_array[i].line_num, 
                    decode_err(errors_array[i].err_code, false));

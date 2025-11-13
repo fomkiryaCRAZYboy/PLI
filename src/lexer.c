@@ -64,6 +64,55 @@ char* get_number_token(char** line_ptr, int current_line)
 
 bool next_is_undrline(char* p) { return *(p + 1) == '_'; } 
 
+/* Identify token type based on token text (keywords, booleans, identifiers) */
+TOKEN_TYPE identify_token_type(char* token_text)
+{
+    if(!token_text)
+        return unknown_token;
+
+    switch(token_text[0])
+    {
+        case 'a':
+            if(strcmp(token_text, "and") == 0) return kw_token_and;
+            break;
+        case 'e':
+            if(strcmp(token_text, "else") == 0) return kw_token_else;
+            if(strcmp(token_text, "end") == 0) return kw_token_end;
+            break;
+        case 'f':
+            if(strcmp(token_text, "false") == 0) return bool_token_f;
+            break;
+        case 'i':
+            if(strcmp(token_text, "if") == 0) return kw_token_if;
+            break;
+        case 'n':
+            if(strcmp(token_text, "not") == 0) return kw_token_not;
+            break;
+        case 'o':
+            if(strcmp(token_text, "or") == 0) return kw_token_or;
+            break;
+        case 'p':
+            if(strcmp(token_text, "print") == 0) return kw_token_print;
+            break;
+        case 'r':
+            if(strcmp(token_text, "read") == 0) return kw_token_read;
+            break;
+        case 't':
+            if(strcmp(token_text, "true") == 0) return bool_token_t;
+            break;
+        case 'v':
+            if(strcmp(token_text, "var") == 0) return kw_token_var;
+            break;
+        case 'w':
+            if(strcmp(token_text, "while") == 0) return kw_token_while;
+            break;
+    }
+
+    /* Default: identifier */
+    return iden_token;
+}
+
+/* get idens, strings, kwords */
 char* get_text_token(char** line_ptr, int current_line)
 {   
     char* current = *line_ptr;
@@ -109,7 +158,7 @@ char* get_text_token(char** line_ptr, int current_line)
     }
 
     /* curr symbol is '_' or alpha */
-    while((isalpha(*current) || *current == '_') && iter < MAX_TOKEN_TEXT_SIZE)
+    while((isalnum(*current) || *current == '_') && iter < MAX_TOKEN_TEXT_SIZE)
     {
         /* double underline "__"  -> invalid iden*/
         if(*current == '_' && *(current + 1) != '\0' && next_is_undrline(current))
@@ -180,7 +229,7 @@ f_result create_token(TOKEN_TYPE token_type, char* token_text, TOKEN_STREAM* str
 /* 
 Helper function to process token: get token text, create token, handle errors
 Returns: SUCCESS on success, error code on failure
-On failure, cleans up stream memory and returns NULL from tokenize
+On failure, returns error code (cleanup is done by caller via goto clean)
 */
 static f_result process_token(
     char* (*get_token_func)(char**, int),
@@ -195,18 +244,46 @@ static f_result process_token(
     if(!token_text)
     {
         add_err_code(get_token_error_code, current_line, false);
-        pli_free(stream->tokens);
-        pli_free(stream);
         return get_token_error_code;
     }
 
     if(create_token(token_type, token_text, stream, current_line) != SUCCESS)
     {
         add_err_code(create_token_error_code, current_line, false);
-        pli_free(stream->tokens);
-        pli_free(stream);
         pli_free(token_text);
         return create_token_error_code;
+    }
+
+    pli_free(token_text);
+    return SUCCESS;
+}
+
+/* 
+Helper function to process text tokens (identifiers, keywords, booleans):
+get token text, identify type, create token, handle errors
+Returns: SUCCESS on success, error code on failure
+On failure, returns error code (cleanup is done by caller via goto clean)
+*/
+static f_result process_text_token(
+    char** line_ptr,
+    int current_line,
+    TOKEN_STREAM* stream,
+    int error_code)
+{
+    char* token_text = get_text_token(line_ptr, current_line);
+    if(!token_text)
+    {
+        add_err_code(error_code, current_line, false);
+        return error_code;
+    }
+
+    TOKEN_TYPE token_type = identify_token_type(token_text);
+
+    if(create_token(token_type, token_text, stream, current_line) != SUCCESS)
+    {
+        add_err_code(error_code, current_line, false);
+        pli_free(token_text);
+        return error_code;
     }
 
     pli_free(token_text);
@@ -219,7 +296,7 @@ defines tokens in block of code.
 */
 TOKEN_STREAM* tokenize(char* block)
 {
-    TOKEN_STREAM* stream;
+    TOKEN_STREAM* stream = NULL;
     char* line_ptr;
     int current_line = 1;
 
@@ -227,15 +304,14 @@ TOKEN_STREAM* tokenize(char* block)
     if(!stream) 
     {
         add_err_code(TOKENIZE_func_STREAM_CREATION_ERROR, current_line, false);
-        return NULL ;
+        goto clean;
     }
 
     stream->tokens = pli_alloc(MAX_TOKENS_COUNT_IN_BLOCK * sizeof(TOKEN));
     if(!stream->tokens)
     {
         add_err_code(TOKENIZE_func_STREAM_CREATION_ERROR, current_line, false);
-        pli_free(stream);
-        return NULL;
+        goto clean;
     }
 
     stream->count = 0;
@@ -266,7 +342,7 @@ TOKEN_STREAM* tokenize(char* block)
                            TOKENIZE_func_GET_NUMBER_TOKEN_ERROR,
                            TOKENIZE_func_NUM_TOKEN_CREATION_ERROR) != SUCCESS)
             {
-                return NULL;
+                goto clean;
             }
         }
 
@@ -277,7 +353,7 @@ TOKEN_STREAM* tokenize(char* block)
                            TOKENIZE_func_TEXT_TOKEN_CREATION_ERROR,
                            TOKENIZE_func_TEXT_TOKEN_CREATION_ERROR) != SUCCESS)
             {
-                return NULL;
+                goto clean;
             }
         }
 
@@ -285,11 +361,10 @@ TOKEN_STREAM* tokenize(char* block)
         /* bool values/identifers/keywords handling */
         else if(isalpha (*line_ptr) || *line_ptr == '_')
         {
-            if(process_token(get_text_token, iden_token, &line_ptr, current_line, stream,
-                           TOKENIZE_func_TEXT_TOKEN_CREATION_ERROR,
-                           TOKENIZE_func_TEXT_TOKEN_CREATION_ERROR) != SUCCESS)
+            if(process_text_token(&line_ptr, current_line, stream,
+                                 TOKENIZE_func_TEXT_TOKEN_CREATION_ERROR) != SUCCESS)
             {
-                return NULL;
+                goto clean;
             }
         }
 
@@ -298,5 +373,14 @@ TOKEN_STREAM* tokenize(char* block)
     }
 
     stream->current_line = current_line;
-    return stream ;
+    return stream;
+
+clean:
+    if(stream)
+    {
+        if(stream->tokens)
+            pli_free(stream->tokens);
+        pli_free(stream);
+    }
+    return NULL;
 }

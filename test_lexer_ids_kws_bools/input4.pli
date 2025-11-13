@@ -1,0 +1,15 @@
+var x 10
+var y true
+var z false
+if x  5
+else
+while y
+print z
+read x
+x and y
+x or y
+not z
+end
+
+
+##success

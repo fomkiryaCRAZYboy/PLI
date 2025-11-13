@@ -1,0 +1,10 @@
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+
+##success
+
+> make run
+./bin/pli
+>>> Error   <code:12> in line 1: TooLongIdentifierError
+>>> Error   <code: 6> in line 1: TextTokenCreationError
+>>> Error   <code: 1> in line 0: TokenizeError
