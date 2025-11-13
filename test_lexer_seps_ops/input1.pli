@@ -1,0 +1,9 @@
+!= == >= <= = * / ( ) { } + -
+
+##FAILED . need to be tested.  check '+' and '-' processing:
+
+./bin/pli
+>>> Error   <code: 9> in line 1: InvalidNumberError
+>>> Error   <code: 4> in line 1: GetNumberTokenError
+>>> Error   <code: 1> in line 0: TokenizeError
+make: *** [makefile:14: run] Ошибка 1

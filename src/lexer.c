@@ -8,6 +8,188 @@
 #include <stdio.h>
 #include <string.h>
 
+/* Convert text to token type (keywords, booleans, or identifier) */
+static TOKEN_TYPE text_to_token_type(char* token_text)
+{
+    if(!token_text)
+        return unknown_token;
+
+    switch(token_text[0])
+    {
+        case 'a':
+            if(strcmp(token_text, "and") == 0) return kw_token_and;
+            break;
+        case 'e':
+            if(strcmp(token_text, "else") == 0) return kw_token_else;
+            if(strcmp(token_text, "end") == 0) return kw_token_end;
+            break;
+        case 'f':
+            if(strcmp(token_text, "false") == 0) return bool_token_f;
+            break;
+        case 'i':
+            if(strcmp(token_text, "if") == 0) return kw_token_if;
+            break;
+        case 'n':
+            if(strcmp(token_text, "not") == 0) return kw_token_not;
+            break;
+        case 'o':
+            if(strcmp(token_text, "or") == 0) return kw_token_or;
+            break;
+        case 'p':
+            if(strcmp(token_text, "print") == 0) return kw_token_print;
+            break;
+        case 'r':
+            if(strcmp(token_text, "read") == 0) return kw_token_read;
+            break;
+        case 't':
+            if(strcmp(token_text, "true") == 0) return bool_token_t;
+            break;
+        case 'v':
+            if(strcmp(token_text, "var") == 0) return kw_token_var;
+            break;
+        case 'w':
+            if(strcmp(token_text, "while") == 0) return kw_token_while;
+            break;
+    }
+
+    /* Default: identifier */
+    return iden_token;
+}
+
+/* Convert operator/separator string to token type */
+static TOKEN_TYPE operator_to_token_type(char* op_sep_text)
+{
+    if(!op_sep_text)
+        return unknown_token;
+
+    /* Check two-character operators first */
+    if(op_sep_text[1] != '\0')
+    {
+        if(strcmp(op_sep_text, "==") == 0) return comp_op_token_equal;
+        if(strcmp(op_sep_text, "!=") == 0) return comp_op_token_not_equal;
+        if(strcmp(op_sep_text, ">=") == 0) return comp_op_token_more_equal;
+        if(strcmp(op_sep_text, "<=") == 0) return comp_op_token_less_equal;
+        
+        return unknown_token;
+    }
+
+    /* Single-character operators and separators */
+    switch(op_sep_text[0])
+    {
+        /* Arithmetic operators */
+        case '*': return math_op_token_mult;
+        case '/': return math_op_token_div;
+        case '+': return math_op_token_plus;
+        case '-': return math_op_token_minus;
+
+        /* Assignment operator */
+        case '=': return assing_op_token;
+
+        /* Comparison operators */
+        case '>': return comp_op_token_more;
+        case '<': return comp_op_token_less;
+
+        /* Separators */
+        case '(': return sep_token_lparen;
+        case ')': return sep_token_rparen;
+        case '{': return sep_token_lbrace;
+        case '}': return sep_token_rbrace;
+        case ',': return sep_token_comma;
+        case ';': return sep_token_semicolon;
+        case '.': return sep_token_dot;
+
+        default:
+            return unknown_token;
+    }
+}
+
+char* get_op_sep_token(char** line_ptr, int current_line)
+{
+    char* current = *line_ptr;
+
+    char* sep_op_token = pli_alloc(MAX_SEP_AND_OP_SIZE + 1);
+    if(!sep_op_token)
+    {
+        add_err_code(GET_SEP_OP_TOKEN_func_ALLOC_ERROR, current_line, false);
+        return NULL ;
+    }
+
+    switch (current[0])
+    {
+    case '*':
+        sep_op_token[0] = '*';
+        goto one_sym;
+    case '/':
+        sep_op_token[0] = '/';
+        goto one_sym;
+    case '+':
+        sep_op_token[0] = '+';
+        goto one_sym;
+    case '-':
+        sep_op_token[0] = '-';
+        goto one_sym;
+    case '=':
+        if(current[1] == '=') goto two_sym;
+        
+        sep_op_token[0] = '=';
+        goto one_sym;
+    case '>':
+        if(current[1] == '=') goto two_sym;
+
+        sep_op_token[0] = '>';
+        goto one_sym;
+    case '<':
+        if(current[1] == '=') goto two_sym;
+
+        sep_op_token[0] = '<';
+        goto one_sym;
+    case '(':
+        sep_op_token[0] = '(';
+        goto one_sym;
+    case ')':
+        sep_op_token[0] = ')';
+        goto one_sym;
+    case '{':
+        sep_op_token[0] = '{';
+        goto one_sym;
+    case '}':
+        sep_op_token[0] = '}';
+        goto one_sym;
+    case ',':
+        sep_op_token[0] = ',';
+        goto one_sym;
+    case ';':
+        sep_op_token[0] = ';';
+        goto one_sym;
+    case '.':
+        sep_op_token[0] = '.';
+        goto one_sym;
+    case '!':  
+        if(current[1] == '=') goto two_sym;
+        /* single '!' is not valid operator */
+        break;
+
+    default:
+        break;
+    }
+
+    /* error - unknown operator/separator */
+    pli_free(sep_op_token);
+    return NULL;
+
+two_sym:
+    sep_op_token[0] = current[0];
+    sep_op_token[1] = current[1];
+    sep_op_token[2] = '\0';
+    *line_ptr = current + 2;  /* move pointer forward by 2 */
+    return sep_op_token;
+
+one_sym:
+    sep_op_token[1] = '\0';
+    *line_ptr = current + 1;  /* move pointer forward by 1 */
+    return sep_op_token;
+}
+
 char* get_number_token(char** line_ptr, int current_line)
 {
     char* current = *line_ptr;
@@ -62,55 +244,7 @@ char* get_number_token(char** line_ptr, int current_line)
     return number_token;
 }
 
-bool next_is_undrline(char* p) { return *(p + 1) == '_'; } 
-
-/* Identify token type based on token text (keywords, booleans, identifiers) */
-TOKEN_TYPE identify_token_type(char* token_text)
-{
-    if(!token_text)
-        return unknown_token;
-
-    switch(token_text[0])
-    {
-        case 'a':
-            if(strcmp(token_text, "and") == 0) return kw_token_and;
-            break;
-        case 'e':
-            if(strcmp(token_text, "else") == 0) return kw_token_else;
-            if(strcmp(token_text, "end") == 0) return kw_token_end;
-            break;
-        case 'f':
-            if(strcmp(token_text, "false") == 0) return bool_token_f;
-            break;
-        case 'i':
-            if(strcmp(token_text, "if") == 0) return kw_token_if;
-            break;
-        case 'n':
-            if(strcmp(token_text, "not") == 0) return kw_token_not;
-            break;
-        case 'o':
-            if(strcmp(token_text, "or") == 0) return kw_token_or;
-            break;
-        case 'p':
-            if(strcmp(token_text, "print") == 0) return kw_token_print;
-            break;
-        case 'r':
-            if(strcmp(token_text, "read") == 0) return kw_token_read;
-            break;
-        case 't':
-            if(strcmp(token_text, "true") == 0) return bool_token_t;
-            break;
-        case 'v':
-            if(strcmp(token_text, "var") == 0) return kw_token_var;
-            break;
-        case 'w':
-            if(strcmp(token_text, "while") == 0) return kw_token_while;
-            break;
-    }
-
-    /* Default: identifier */
-    return iden_token;
-}
+static bool next_is_undrline(char* p) { return *(p + 1) == '_'; } 
 
 /* get idens, strings, kwords */
 char* get_text_token(char** line_ptr, int current_line)
@@ -137,7 +271,7 @@ char* get_text_token(char** line_ptr, int current_line)
             text_token[iter++] = *current++;
         }
         
-        /* check if string иis too long */
+        /* check if string is too long */
         if(iter == MAX_TOKEN_TEXT_SIZE && *current != '"' && *current != '\0')
         {
             add_err_code(GET_TEXT_TOKEN_func_LONG_IDENTIFIER_ERROR, current_line, false);
@@ -277,7 +411,39 @@ static f_result process_text_token(
         return error_code;
     }
 
-    TOKEN_TYPE token_type = identify_token_type(token_text);
+    TOKEN_TYPE token_type = text_to_token_type(token_text);
+
+    if(create_token(token_type, token_text, stream, current_line) != SUCCESS)
+    {
+        add_err_code(error_code, current_line, false);
+        pli_free(token_text);
+        return error_code;
+    }
+
+    pli_free(token_text);
+    return SUCCESS;
+}
+
+/* 
+Helper function to process operator/separator tokens:
+get token text, identify type, create token, handle errors
+Returns: SUCCESS on success, error code on failure
+On failure, returns error code (cleanup is done by caller via goto clean)
+*/
+static f_result process_operator_token(
+    char** line_ptr,
+    int current_line,
+    TOKEN_STREAM* stream,
+    int error_code)
+{
+    char* token_text = get_op_sep_token(line_ptr, current_line);
+    if(!token_text)
+    {
+        add_err_code(error_code, current_line, false);
+        return error_code;
+    }
+
+    TOKEN_TYPE token_type = operator_to_token_type(token_text);
 
     if(create_token(token_type, token_text, stream, current_line) != SUCCESS)
     {
@@ -368,7 +534,17 @@ TOKEN_STREAM* tokenize(char* block)
             }
         }
 
-        //++line_ptr;
+        /* separators and operations handling */
+        else
+        {
+            if(process_operator_token(&line_ptr, current_line, stream, 
+                                     GET_SEP_OP_TOKEN_func_INVALID_SEP_OP_ERROR) != SUCCESS)
+            {
+                goto clean;
+            }
+        }
+
+        ++line_ptr;
 
     }
 

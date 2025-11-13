@@ -28,7 +28,10 @@
         \
         DECODE(GET_TEXT_TOKEN_func_ALLOC_ERROR,              "IdentifierTokenAllocError") \
         DECODE(GET_TEXT_TOKEN_func_INVAILD_IDENTIFIER_ERROR, "InvalidIdentifierError") \
-        DECODE(GET_TEXT_TOKEN_func_LONG_IDENTIFIER_ERROR,    "TooLongIdentifierError")
+        DECODE(GET_TEXT_TOKEN_func_LONG_IDENTIFIER_ERROR,    "TooLongIdentifierError") \
+        \
+        DECODE(GET_SEP_OP_TOKEN_func_ALLOC_ERROR,            "SepOpTokenAllocError") \
+        DECODE(GET_SEP_OP_TOKEN_func_INVALID_SEP_OP_ERROR,   "InvalidSepOpError") \
 
 
 /* generate enum for all kinds of warnings */        
