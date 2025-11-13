@@ -7,26 +7,29 @@
 #define MAX_FAILS   20
 
 #define WARNINGS \
-        DECODE_w(SUCCESS_w,                               "Success") \
+        DECODE_w(SUCCESS_w,                             "Success") \
         DECODE_w(PLI_FREE_func_UNTRACKED_POINTER,       "TryingToFreeUntrackedPointer")
     
 
 #define ERRORS \
-        DECODE(SUCCESS,                                 "Success") \
-        DECODE(MAIN_func_TOKENIZE_ERROR,                "TokenizeError") \
+        DECODE(SUCCESS,                                      "Success") \
+        DECODE(MAIN_func_TOKENIZE_ERROR,                     "TokenizeError") \
         \
-        DECODE(CREATE_TOKEN_func_STREAM_OVERFLOW_ERROR, "TokenStreamOverflowError") \
+        DECODE(CREATE_TOKEN_func_STREAM_OVERFLOW_ERROR,      "TokenStreamOverflowError") \
         \
-        DECODE(TOKENIZE_func_STREAM_CREATION_ERROR,     "StreamCreationError") \
-        DECODE(TOKENIZE_func_GET_NUMBER_TOKEN_ERROR,    "GetNumberTokenError") \
-        DECODE(TOKENIZE_func_NUM_TOKEN_CREATION_ERROR,  "NumberTokenCreationError") \
+        DECODE(TOKENIZE_func_STREAM_CREATION_ERROR,          "StreamCreationError") \
+        DECODE(TOKENIZE_func_GET_NUMBER_TOKEN_ERROR,         "GetNumberTokenError") \
+        DECODE(TOKENIZE_func_NUM_TOKEN_CREATION_ERROR,       "NumberTokenCreationError") \
+        DECODE(TOKENIZE_func_TEXT_TOKEN_CREATION_ERROR,      "TextTokenCreationError") \
         \
-        DECODE(GET_NUMBER_TOKEN_func_ALLOC_ERROR,       "NumberTokenAllocError") \
-        DECODE(GET_NUMBER_TOKEN_func_BIG_NUMBER_ERROR,  "BigNumberError") \
-        DECODE(GET_NUMBER_TOKEN_func_INVALID_NUMBER,    "InvalidNumberError") \
+        DECODE(GET_NUMBER_TOKEN_func_ALLOC_ERROR,            "NumberTokenAllocError") \
+        DECODE(GET_NUMBER_TOKEN_func_BIG_NUMBER_ERROR,       "BigNumberError") \
+        DECODE(GET_NUMBER_TOKEN_func_INVALID_NUMBER,         "InvalidNumberError") \
         \
-        DECODE(GET_IDEN_TOKEN_func_ALLOC_ERROR,         "IdentifierTokenAllocError") \
-        DECODE(GET_IDEN_TOKEN_func_INVAILD_IDENTIFIER,  "InvalidIdentifierError")
+        DECODE(GET_TEXT_TOKEN_func_ALLOC_ERROR,              "IdentifierTokenAllocError") \
+        DECODE(GET_TEXT_TOKEN_func_INVAILD_IDENTIFIER_ERROR, "InvalidIdentifierError") \
+        DECODE(GET_TEXT_TOKEN_func_LONG_IDENTIFIER_ERROR,    "TooLongIdentifierError")
+
 
 /* generate enum for all kinds of warnings */        
 typedef enum

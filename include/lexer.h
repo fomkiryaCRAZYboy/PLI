@@ -110,7 +110,19 @@ TOKEN_STREAM* tokenize(char* block) ;
 
 f_result create_token(TOKEN_TYPE token_type, char* token_text, TOKEN_STREAM* stream, int line_number) ;
 char* get_number_token(char** line_ptr, int current_line);
-char* get_iden_token(char** line_ptr, int current_line);
+char* get_text_token(char** line_ptr, int current_line);
+
+/* help func */
+bool next_is_undrline(char* p);
+
+static f_result process_token(
+    char* (*get_token_func)(char**, int),
+    TOKEN_TYPE token_type,
+    char** line_ptr,
+    int current_line,
+    TOKEN_STREAM* stream,
+    int get_token_error_code,
+    int create_token_error_code);
 
 /* debug */
 void debug_print_stream(TOKEN_STREAM* stream);

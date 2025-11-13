@@ -56,8 +56,6 @@ int main() {
     program[total_read] = '\0';
 #endif /* FILE_INPUT */
 
-    char* x = malloc(10);
-
     stream = tokenize(program);
     if(!stream)
     {

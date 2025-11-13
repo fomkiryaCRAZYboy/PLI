@@ -62,30 +62,88 @@ char* get_number_token(char** line_ptr, int current_line)
     return number_token;
 }
 
-#if 0
-char* get_iden_token(char** line_ptr, int current_line)
+bool next_is_undrline(char* p) { return *(p + 1) == '_'; } 
+
+char* get_text_token(char** line_ptr, int current_line)
 {   
     char* current = *line_ptr;
 
-    char* identifier_token = pli_alloc(MAX_TOKEN_TEXT_SIZE + 1);
-    if(!identifier_token)
+    char* text_token = pli_alloc(MAX_TOKEN_TEXT_SIZE + 1);
+    if(!text_token)
     {
-        add_err_code(GET_IDEN_TOKEN_func_ALLOC_ERROR, current_line, false);
+        add_err_code(GET_TEXT_TOKEN_func_ALLOC_ERROR, current_line, false);
         return NULL ;
     }
 
-    /* '_'/'__' - invalid identifier name */
-    if(*current == '_' && !isalpha(*(current + 1)))
+    int iter = 0;
+
+    /* string literal handling: starts with " */
+    if(*current == '"')
     {
-        //add_err_code()
+        text_token[iter++] = *current++;  /* add opening " */
+        
+        /* read all characters until closing " */
+        while(*current != '\0' && *current != '"' && iter < MAX_TOKEN_TEXT_SIZE)
+        {
+            text_token[iter++] = *current++;
+        }
+        
+        /* check if string иis too long */
+        if(iter == MAX_TOKEN_TEXT_SIZE && *current != '"' && *current != '\0')
+        {
+            add_err_code(GET_TEXT_TOKEN_func_LONG_IDENTIFIER_ERROR, current_line, false);
+            pli_free(text_token);
+            return NULL;
+        }
+        
+        /* add closing " if found */
+        if(*current == '"' && iter < MAX_TOKEN_TEXT_SIZE)
+        {
+            text_token[iter++] = *current++;
+        }
+        /* if string is unterminated (*current == '\0'), we just return what we have */
+        
+        text_token[iter] = '\0';
+        *line_ptr = current;
+        return text_token;
     }
 
-    while(isalpha(*current) || )
+    /* curr symbol is '_' or alpha */
+    while((isalpha(*current) || *current == '_') && iter < MAX_TOKEN_TEXT_SIZE)
+    {
+        /* double underline "__"  -> invalid iden*/
+        if(*current == '_' && *(current + 1) != '\0' && next_is_undrline(current))
+        {
+            add_err_code(GET_TEXT_TOKEN_func_INVAILD_IDENTIFIER_ERROR, current_line, false);
+            pli_free(text_token);
+            return NULL;
+        }
+
+        text_token[iter++] = *current++;
+    }
+
+    /* too long iden name -> error */
+    if(iter == MAX_TOKEN_TEXT_SIZE && (isalpha(*current) || *current == '_'))
+    {
+        add_err_code(GET_TEXT_TOKEN_func_LONG_IDENTIFIER_ERROR, current_line, false);
+        pli_free(text_token);
+        return NULL;
+    }
+
+    text_token[iter] = '\0';
+
+    /* '_'  -> invalid iden*/
+    if(iter == 0 || (iter == 1 && text_token[0] == '_'))
+    {
+        add_err_code(GET_TEXT_TOKEN_func_INVAILD_IDENTIFIER_ERROR, current_line, false);
+        pli_free(text_token);
+        return NULL;
+    }
+
 
     *line_ptr = current;
-    return identifier_token;
+    return text_token;
 }
-#endif
 
 /* create token directly in the tokens stream */
 f_result create_token(TOKEN_TYPE token_type, char* token_text, TOKEN_STREAM* stream, int line_number)
@@ -119,6 +177,41 @@ f_result create_token(TOKEN_TYPE token_type, char* token_text, TOKEN_STREAM* str
     return SUCCESS ;
 }
 
+/* 
+Helper function to process token: get token text, create token, handle errors
+Returns: SUCCESS on success, error code on failure
+On failure, cleans up stream memory and returns NULL from tokenize
+*/
+static f_result process_token(
+    char* (*get_token_func)(char**, int),
+    TOKEN_TYPE token_type,
+    char** line_ptr,
+    int current_line,
+    TOKEN_STREAM* stream,
+    int get_token_error_code,
+    int create_token_error_code)
+{
+    char* token_text = get_token_func(line_ptr, current_line);
+    if(!token_text)
+    {
+        add_err_code(get_token_error_code, current_line, false);
+        pli_free(stream->tokens);
+        pli_free(stream);
+        return get_token_error_code;
+    }
+
+    if(create_token(token_type, token_text, stream, current_line) != SUCCESS)
+    {
+        add_err_code(create_token_error_code, current_line, false);
+        pli_free(stream->tokens);
+        pli_free(stream);
+        pli_free(token_text);
+        return create_token_error_code;
+    }
+
+    pli_free(token_text);
+    return SUCCESS;
+}
 
 /*  
 main tokenize function that 
@@ -169,42 +262,36 @@ TOKEN_STREAM* tokenize(char* block)
         /* numbers handling */  
         if(isdigit (*line_ptr) || *line_ptr == '+' || *line_ptr == '-') 
         {
-            char* text_token = get_number_token(&(line_ptr), current_line);
-            if(!text_token)
+            if(process_token(get_number_token, num_token, &line_ptr, current_line, stream,
+                           TOKENIZE_func_GET_NUMBER_TOKEN_ERROR,
+                           TOKENIZE_func_NUM_TOKEN_CREATION_ERROR) != SUCCESS)
             {
-                add_err_code(TOKENIZE_func_GET_NUMBER_TOKEN_ERROR, current_line, false);
-                pli_free(stream->tokens);
-                pli_free(stream);
-
-                return NULL ;
+                return NULL;
             }
-
-            if(create_token(num_token, text_token, stream, current_line) != SUCCESS)
-            {
-                add_err_code(TOKENIZE_func_NUM_TOKEN_CREATION_ERROR, current_line, false);
-
-                pli_free(stream->tokens);
-                pli_free(stream);
-                pli_free(text_token);
-
-                return NULL ;
-            }
-
-            pli_free(text_token);
         }
 
-        #if 0
+        /* string literals handling */
+        else if(*line_ptr == '"')
+        {
+            if(process_token(get_text_token, str_token, &line_ptr, current_line, stream,
+                           TOKENIZE_func_TEXT_TOKEN_CREATION_ERROR,
+                           TOKENIZE_func_TEXT_TOKEN_CREATION_ERROR) != SUCCESS)
+            {
+                return NULL;
+            }
+        }
+
         /* true/_name/print */
         /* bool values/identifers/keywords handling */
-        if(isalpha (*line_ptr) || *line_ptr == '_')
+        else if(isalpha (*line_ptr) || *line_ptr == '_')
         {
-            /* getting variable name */
-            if(*line_ptr == '_')
+            if(process_token(get_text_token, iden_token, &line_ptr, current_line, stream,
+                           TOKENIZE_func_TEXT_TOKEN_CREATION_ERROR,
+                           TOKENIZE_func_TEXT_TOKEN_CREATION_ERROR) != SUCCESS)
             {
-
+                return NULL;
             }
         }
-        #endif
 
         //++line_ptr;
 
