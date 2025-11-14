@@ -1,0 +1,16 @@
+var x = 0
+var y = 10
+while x < y
+    if x == 5
+        print "halfway"
+    else
+        if x > 5
+            print "more than half"
+        else
+            print "less than half"
+        end
+    end
+    x = x + 1
+end
+
+

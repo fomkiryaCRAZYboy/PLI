@@ -1,0 +1,9 @@
+var flag = true
+var check = false
+if flag and check
+    print "both true"
+else
+    print "not both"
+end
+
+

@@ -1,0 +1,16 @@
+var a = 10
+var b = 20
+var c = 30
+if a < b and b < c
+    print "a < b < c"
+end
+if a > b or b > c
+    print "not ordered"
+end
+if a == b or b == c
+    print "some equal"
+end
+if a != b and b != c
+    print "all different"
+end
+

@@ -1,0 +1,21 @@
+var x = 10
+if x == 10
+    print "equal"
+end
+if x != 5
+    print "not equal"
+end
+if x > 5
+    print "greater"
+end
+if x < 20
+    print "less"
+end
+if x >= 10
+    print "greater or equal"
+end
+if x <= 10
+    print "less or equal"
+end
+
+

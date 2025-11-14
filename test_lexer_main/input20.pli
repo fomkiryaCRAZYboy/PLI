@@ -1,0 +1,10 @@
+var name = "John"
+var age = 25
+var is_adult = true
+print name
+print age
+if is_adult
+    print "adult"
+end
+
+

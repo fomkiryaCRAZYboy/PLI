@@ -1,0 +1,8 @@
+var x = 5
+var y = 10
+var result = x + y
+var product = x * y
+var quotient = y / x
+var difference = y - x
+
+

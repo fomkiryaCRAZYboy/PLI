@@ -1,0 +1,14 @@
+var is_valid = true
+var is_empty = false
+var has_data = true
+if is_valid and not is_empty
+    if has_data
+        print "valid data"
+    else
+        print "no data"
+    end
+else
+    print "invalid or empty"
+end
+
+

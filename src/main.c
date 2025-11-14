@@ -7,7 +7,7 @@
 #include <stdlib.h>
 
 #ifdef FILE_INPUT
-#define input_file "test_lexer_seps_ops/input1.pli"
+#define input_file "/home/user/kirill/PLI/test_lexer_main/input8.pli"
 #endif
 
 int main() {    

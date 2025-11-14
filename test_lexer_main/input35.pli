@@ -1,0 +1,11 @@
+var count = 0
+var limit = 5
+while count < limit
+    print count
+    count = count + 1
+    if count == limit
+        print "reached limit"
+    end
+end
+
+

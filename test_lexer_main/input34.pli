@@ -1,0 +1,14 @@
+var x = 1
+var y = 2
+var z = 3
+if x < y and y < z
+    print "ascending"
+end
+if x > y or y > z
+    print "not ascending"
+end
+if not (x == y)
+    print "x != y"
+end
+
+

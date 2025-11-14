@@ -19,8 +19,13 @@
         \
         DECODE(TOKENIZE_func_STREAM_CREATION_ERROR,          "StreamCreationError") \
         DECODE(TOKENIZE_func_GET_NUMBER_TOKEN_ERROR,         "GetNumberTokenError") \
+        DECODE(TOKENIZE_func_GET_TEXT_TOKEN_ERROR,           "GetTextTokenError") \
+        DECODE(TOKENIZE_func_GET_SEP_OP_TOKEN_ERROR,         "GetSepOpTokenError") \
+        DECODE(TOKENIZE_func_GET_STR_TOKEN_ERROR,            "GetStringTokenError") \
         DECODE(TOKENIZE_func_NUM_TOKEN_CREATION_ERROR,       "NumberTokenCreationError") \
         DECODE(TOKENIZE_func_TEXT_TOKEN_CREATION_ERROR,      "TextTokenCreationError") \
+        DECODE(TOKENIZE_func_SEP_OP_TOKEN_CREATION_ERROR,    "SepOpTokenCreationError") \
+        DECODE(TOKENIZE_func_STRING_TOKEN_CREATION_ERROR,    "StringTokenCreationError") \
         \
         DECODE(GET_NUMBER_TOKEN_func_ALLOC_ERROR,            "NumberTokenAllocError") \
         DECODE(GET_NUMBER_TOKEN_func_BIG_NUMBER_ERROR,       "BigNumberError") \
@@ -29,6 +34,8 @@
         DECODE(GET_TEXT_TOKEN_func_ALLOC_ERROR,              "IdentifierTokenAllocError") \
         DECODE(GET_TEXT_TOKEN_func_INVAILD_IDENTIFIER_ERROR, "InvalidIdentifierError") \
         DECODE(GET_TEXT_TOKEN_func_LONG_IDENTIFIER_ERROR,    "TooLongIdentifierError") \
+        DECODE(GET_TEXT_TOKEN_func_LONG_STRING_ERROR,        "TooLongStringError") \
+        DECODE(GET_TEXT_TOKEN_func_QUOTE_NOT_FOUND_ERROR,    "ClosingQouteNotFoundError") \
         \
         DECODE(GET_SEP_OP_TOKEN_func_ALLOC_ERROR,            "SepOpTokenAllocError") \
         DECODE(GET_SEP_OP_TOKEN_func_INVALID_SEP_OP_ERROR,   "InvalidSepOpError") \

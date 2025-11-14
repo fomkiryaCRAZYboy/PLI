@@ -1,0 +1,12 @@
+var name = "test"
+var value = 42
+var active = true
+read name
+read value
+print name
+print value
+if active
+    print "active"
+end
+
+

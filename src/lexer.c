@@ -203,11 +203,6 @@ char* get_number_token(char** line_ptr, int current_line)
 
     int iter = 0;
 
-    if (*current == '+' || *current == '-')
-    {
-        number_token[iter++] = *current++;
-    }
-
     while(isdigit(*current) && iter < MAX_NUM_SIZE)
     {
         number_token[iter++] = *current++;
@@ -232,7 +227,7 @@ char* get_number_token(char** line_ptr, int current_line)
 
     number_token[iter] = '\0';
     
-    if (iter == 0 || (iter == 1 && (number_token[0] == '+' || number_token[0] == '-' || number_token[0] == '.'))) 
+    if (iter == 0 || (iter == 1 && number_token[0] == '.'))
     {
         add_err_code(GET_NUMBER_TOKEN_func_INVALID_NUMBER, current_line, false);
         pli_free(number_token);
@@ -274,17 +269,21 @@ char* get_text_token(char** line_ptr, int current_line)
         /* check if string is too long */
         if(iter == MAX_TOKEN_TEXT_SIZE && *current != '"' && *current != '\0')
         {
-            add_err_code(GET_TEXT_TOKEN_func_LONG_IDENTIFIER_ERROR, current_line, false);
+            add_err_code(GET_TEXT_TOKEN_func_LONG_STRING_ERROR, current_line, false);
             pli_free(text_token);
             return NULL;
         }
         
-        /* add closing " if found */
-        if(*current == '"' && iter < MAX_TOKEN_TEXT_SIZE)
+        /* closing quote no found */
+        if(*current != '"')
         {
-            text_token[iter++] = *current++;
+            add_err_code(GET_TEXT_TOKEN_func_QUOTE_NOT_FOUND_ERROR, current_line, false);
+            pli_free(text_token);
+            return NULL;
         }
-        /* if string is unterminated (*current == '\0'), we just return what we have */
+
+        /* add closing quote */
+        text_token[iter++] = *current++;
         
         text_token[iter] = '\0';
         *line_ptr = current;
@@ -402,22 +401,23 @@ static f_result process_text_token(
     char** line_ptr,
     int current_line,
     TOKEN_STREAM* stream,
-    int error_code)
+    int get_token_error_code,
+    int create_token_error_code)
 {
     char* token_text = get_text_token(line_ptr, current_line);
     if(!token_text)
     {
-        add_err_code(error_code, current_line, false);
-        return error_code;
+        add_err_code(get_token_error_code, current_line, false);
+        return get_token_error_code;
     }
 
     TOKEN_TYPE token_type = text_to_token_type(token_text);
 
     if(create_token(token_type, token_text, stream, current_line) != SUCCESS)
     {
-        add_err_code(error_code, current_line, false);
+        add_err_code(create_token_error_code, current_line, false);
         pli_free(token_text);
-        return error_code;
+        return create_token_error_code;
     }
 
     pli_free(token_text);
@@ -434,22 +434,23 @@ static f_result process_operator_token(
     char** line_ptr,
     int current_line,
     TOKEN_STREAM* stream,
-    int error_code)
+    int get_token_error_code,
+    int create_token_error_code)
 {
     char* token_text = get_op_sep_token(line_ptr, current_line);
     if(!token_text)
     {
-        add_err_code(error_code, current_line, false);
-        return error_code;
+        add_err_code(get_token_error_code, current_line, false);
+        return get_token_error_code;
     }
 
     TOKEN_TYPE token_type = operator_to_token_type(token_text);
 
     if(create_token(token_type, token_text, stream, current_line) != SUCCESS)
     {
-        add_err_code(error_code, current_line, false);
+        add_err_code(create_token_error_code, current_line, false);
         pli_free(token_text);
-        return error_code;
+        return create_token_error_code;
     }
 
     pli_free(token_text);
@@ -502,7 +503,7 @@ TOKEN_STREAM* tokenize(char* block)
 
         /* starts from '+'/'-'/digit --> number*/  
         /* numbers handling */  
-        if(isdigit (*line_ptr) || *line_ptr == '+' || *line_ptr == '-') 
+        if(isdigit (*line_ptr)) 
         {
             if(process_token(get_number_token, num_token, &line_ptr, current_line, stream,
                            TOKENIZE_func_GET_NUMBER_TOKEN_ERROR,
@@ -516,8 +517,8 @@ TOKEN_STREAM* tokenize(char* block)
         else if(*line_ptr == '"')
         {
             if(process_token(get_text_token, str_token, &line_ptr, current_line, stream,
-                           TOKENIZE_func_TEXT_TOKEN_CREATION_ERROR,
-                           TOKENIZE_func_TEXT_TOKEN_CREATION_ERROR) != SUCCESS)
+                           TOKENIZE_func_GET_STR_TOKEN_ERROR,
+                           TOKENIZE_func_STRING_TOKEN_CREATION_ERROR) != SUCCESS)
             {
                 goto clean;
             }
@@ -528,6 +529,7 @@ TOKEN_STREAM* tokenize(char* block)
         else if(isalpha (*line_ptr) || *line_ptr == '_')
         {
             if(process_text_token(&line_ptr, current_line, stream,
+                                 TOKENIZE_func_GET_TEXT_TOKEN_ERROR,
                                  TOKENIZE_func_TEXT_TOKEN_CREATION_ERROR) != SUCCESS)
             {
                 goto clean;
@@ -538,13 +540,12 @@ TOKEN_STREAM* tokenize(char* block)
         else
         {
             if(process_operator_token(&line_ptr, current_line, stream, 
-                                     GET_SEP_OP_TOKEN_func_INVALID_SEP_OP_ERROR) != SUCCESS)
+                                     TOKENIZE_func_GET_SEP_OP_TOKEN_ERROR,
+                                     TOKENIZE_func_SEP_OP_TOKEN_CREATION_ERROR) != SUCCESS)
             {
                 goto clean;
             }
         }
-
-        ++line_ptr;
 
     }
 

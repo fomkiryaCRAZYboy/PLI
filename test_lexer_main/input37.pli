@@ -1,0 +1,15 @@
+var flag_a = true
+var flag_b = false
+var flag_c = true
+var flag_d = false
+if flag_a and flag_b
+    print "a and b"
+end
+if flag_c or flag_d
+    print "c or d"
+end
+if not flag_a
+    print "not a"
+end
+
+

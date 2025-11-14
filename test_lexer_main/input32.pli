@@ -1,0 +1,8 @@
+var msg1 = "Hello"
+var msg2 = "World"
+var msg3 = "Test"
+print msg1
+print msg2
+print msg3
+
+

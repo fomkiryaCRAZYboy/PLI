@@ -1,0 +1,9 @@
+var x = 1
+var y = 2
+var z = 3
+var w = 4
+var sum = x + y + z + w
+var prod = x * y * z * w
+var diff = w - z - y - x
+
+

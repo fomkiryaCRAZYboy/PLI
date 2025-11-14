@@ -1,0 +1,10 @@
+var name = "Alice"
+var age = 30
+var city = "Moscow"
+print name
+print age
+print city
+read name
+read age
+
+
