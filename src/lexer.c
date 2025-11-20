@@ -296,7 +296,7 @@ char* get_text_token(char** line_ptr, int current_line)
         /* double underline "__"  -> invalid iden*/
         if(*current == '_' && *(current + 1) != '\0' && next_is_undrline(current))
         {
-            add_err_code(GET_TEXT_TOKEN_func_INVAILD_IDENTIFIER_ERROR, current_line, false);
+            add_err_code(GET_TEXT_TOKEN_func_INVALID_IDENTIFIER_ERROR, current_line, false);
             pli_free(text_token);
             return NULL;
         }
@@ -317,7 +317,7 @@ char* get_text_token(char** line_ptr, int current_line)
     /* '_'  -> invalid iden*/
     if(iter == 0 || (iter == 1 && text_token[0] == '_'))
     {
-        add_err_code(GET_TEXT_TOKEN_func_INVAILD_IDENTIFIER_ERROR, current_line, false);
+        add_err_code(GET_TEXT_TOKEN_func_INVALID_IDENTIFIER_ERROR, current_line, false);
         pli_free(text_token);
         return NULL;
     }
@@ -555,8 +555,7 @@ TOKEN_STREAM* tokenize(char* block)
 clean:
     if(stream)
     {
-        if(stream->tokens)
-            pli_free(stream->tokens);
+        pli_free(stream->tokens);
         pli_free(stream);
     }
     return NULL;

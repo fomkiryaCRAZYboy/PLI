@@ -32,7 +32,7 @@
         DECODE(GET_NUMBER_TOKEN_func_INVALID_NUMBER,         "InvalidNumberError") \
         \
         DECODE(GET_TEXT_TOKEN_func_ALLOC_ERROR,              "IdentifierTokenAllocError") \
-        DECODE(GET_TEXT_TOKEN_func_INVAILD_IDENTIFIER_ERROR, "InvalidIdentifierError") \
+        DECODE(GET_TEXT_TOKEN_func_INVALID_IDENTIFIER_ERROR, "InvalidIdentifierError") \
         DECODE(GET_TEXT_TOKEN_func_LONG_IDENTIFIER_ERROR,    "TooLongIdentifierError") \
         DECODE(GET_TEXT_TOKEN_func_LONG_STRING_ERROR,        "TooLongStringError") \
         DECODE(GET_TEXT_TOKEN_func_QUOTE_NOT_FOUND_ERROR,    "ClosingQouteNotFoundError") \

@@ -59,8 +59,7 @@ void emergency_cleanup()
 {
     while (memory_chain)
     {
-        if(memory_chain -> ptr)
-            free (memory_chain -> ptr);
+        free (memory_chain -> ptr);
 
         MEMORY_BLOCK* tmp = memory_chain;
         memory_chain = memory_chain -> prev;
