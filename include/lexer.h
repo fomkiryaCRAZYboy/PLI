@@ -78,7 +78,7 @@ TOKEN_TYPE ;
 
 
 /* Token text union for different data types */
-typedef union token_value
+typedef union token_text
 {
     char text            [MAX_TOKEN_TEXT_SIZE];     /* For identifiers, strings, keywords */
     char num_text        [MAX_NUM_SIZE];            /* For integer and float numbers */
