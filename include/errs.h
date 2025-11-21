@@ -13,6 +13,8 @@
 
 #define ERRORS \
         DECODE(SUCCESS,                                      "Success") \
+        DECODE(MEMORY_ALLOCATION_ERROR,                      "MemoryAllocationError") \
+        \
         DECODE(MAIN_func_TOKENIZE_ERROR,                     "TokenizeError") \
         \
         DECODE(CREATE_TOKEN_func_STREAM_OVERFLOW_ERROR,      "TokenStreamOverflowError") \
@@ -39,6 +41,11 @@
         \
         DECODE(GET_SEP_OP_TOKEN_func_ALLOC_ERROR,            "SepOpTokenAllocError") \
         DECODE(GET_SEP_OP_TOKEN_func_INVALID_SEP_OP_ERROR,   "InvalidSepOpError") \
+        \
+        DECODE(PARSING_func_MISSING_LPAREN_PRINT_ST_ERROR,   "MissingOpeningParenthesisError") \
+        DECODE(PARSING_func_INVALID_ARG_PRINT_ST_ERROR,      "InvalidPrintArgumentError") \
+        \
+        DECODE(PRINT_ADD_ARG_func_VARIABLE_NOT_EXIST_ERROR,  "VariableDoesNotExist") \
 
 
 /* generate enum for all kinds of warnings */        

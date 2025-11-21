@@ -2,6 +2,7 @@
 #include "errs.h"
 
 #include <stdlib.h>
+#include <string.h>
 #include <stdio.h>
 
 /* start of memory chain, it leads to NULL */
@@ -52,6 +53,31 @@ void pli_free(void* ptr)
     
     add_err_code(PLI_FREE_func_UNTRACKED_POINTER, 0, true);
     return ; /* trying to free untracked pointer */
+}
+
+void* pli_realloc(void* old_ptr, size_t new_size, size_t old_size)
+{
+    if (!old_ptr)
+        return pli_alloc(new_size);
+
+    if(new_size == 0)
+    {
+        pli_free(old_ptr);
+        return NULL ;
+    }
+
+    void* new_ptr = pli_alloc(new_size);
+    if(!new_ptr)
+        return NULL;
+
+    size_t copy_size = (new_size > old_size) ? old_size : new_size;
+
+    if(copy_size > 0)
+        memcpy(new_ptr, old_ptr, copy_size);
+    
+    pli_free(old_ptr);
+
+    return new_ptr;
 }
 
 /* clearing all memory */

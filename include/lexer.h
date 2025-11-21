@@ -31,7 +31,7 @@ typedef enum
     kw_token_end  ,     /* 'end'   - program termination */
 
     /* --- IDENTIFIERS --- */
-    iden_token    ,      /* identifier - variable, e.g.: 'x', 'count', 'my_var' */
+    iden_token,          /* identifier - variable, e.g.: 'x', 'count', 'my_var' */
 
     /* --- LITERALS --- */
     str_token   ,        /* string literal, e.g. : '"hello"', '"world"' */
@@ -78,7 +78,7 @@ TOKEN_TYPE ;
 
 
 /* Token text union for different data types */
-typedef union token_value
+typedef union
 {
     char text            [MAX_TOKEN_TEXT_SIZE];     /* For identifiers, strings, keywords */
     char num_text        [MAX_NUM_SIZE];            /* For integer and float numbers */

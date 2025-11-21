@@ -1,14 +1,16 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-#define BOOL_TRUE  1
-#define BOOL_FALSE 0
-
 #include "lexer.h"
 #include "var.h"
+#include "ops.h"
 
-#define MAX_STR_SIZE    MAX_TOKEN_TEXT_SIZE
-#define MAX_VAR_SIZE    MAX_TOKEN_TEXT_SIZE
+#define MAX_PRINT_ARGS  24
+
+/*
+необходимо создать структуру общего узла base_node_t, в которой будет указатель на base_node_t, который нужно исполнить следующим
+в этой стркутуре будет void* ptr на узел конкретного типа.
+*/
 
 /* 
 предположительно, функция parsing() должна возвращать 
@@ -24,24 +26,19 @@ AST-узел - структура данных, обозначающая кон�
 По этому принципу должно строится абстрактное синтаксическое дерево.
 */
 
+/* node is an atomic operation */
 typedef enum
 {
     /* variable declaration */
     VAR_DECLARATION_NODE,     /* var x = "str"; */  /* var x; */
-
-    /* statements */
-    IF_STATEMENT_NODE,        /* if(...) {...} */
-    WHILE_STATEMENT_NODE,     /* while(...) {...} */
-    PRINT_STATEMENT_NODE,     /* print(...) */
-    READ_STATEMENT_NODE,      /* read(...) */
-
-    CONDITION_NODE,           /* (x > 5 and y != "hello") */
-    BODY_NODE,                /* { ... } */  /*example: {read(x); print(x); end;} */
-
-    /* simple operations */
-
     /* assignment operation */
     ASSIGNMENT_OP_NODE,       /* y = 12.4; */
+
+    /*  all mathematic operations */
+    MATH_OP_NODE,             /* x * 4.3 */
+                              /* 5 / 2 */
+                              /* 113 + 34.45 */
+                              /* 80 - 3 */
 
     /* all boolean operations */
     BINARY_OP_NODE,           /* x > 3 */ 
@@ -51,25 +48,67 @@ typedef enum
                               /* x == 0 */
                               /* x != 0 */
 
-    /*  all mathematic operations */
-    MATH_OP_NODE,             /* x * 4.3 */
-                              /* 5 / 2 */
-                              /* 113 + 34.45 */
-                              /* 80 - 3 */
+    /* all logical operations */
+    LOGICAL_OP_NODE,           /* and, or, not */
 
-    END_NODE                  /* end; */ /* termination program */
+    /* read and print statements */
+    IO_OP_NODE                /* read, print */
 }
 NODE_TYPE ;
 
-
+/* base node structure */
 typedef struct
 {
-    NODE_TYPE node_type;   /* node type: VAR_DECLARATION_NODE */
-    VARIABLE* var;         /* declared variable */
-    VALUE*    value;       /* assigned value */
+    NODE_TYPE    node_type;     /* specific node type */
+    void*        specific_node; /* pointer to specific node */
 }
-VAR_DECLARATION_UNIT;
+base_node_t;
 
+
+/* ---specific nodes--- */
+
+/* for declaration and assignment */
+typedef struct
+{
+    variable_t* var;         /* declared variable */
+    value_t*    value;       /* assigned value */
+}
+var_operation_unit_t;
+
+/* for addition, subtraction, division and multiplication ops */
+typedef struct
+{
+    MATH_OP  op;    /* +, -, *, / */
+    value_t* left_operand;
+    value_t* right_operand;
+}
+math_operation_unit_t;
+
+/* for compare ops */
+typedef struct
+{
+    BIN_OP  op;    /* =, !=, >, <, >=, <= */
+    value_t* left_operand;
+    value_t* right_operand;
+}
+bin_operation_unit_t;
+
+/* for logical ops */
+typedef struct
+{
+    LOGICAL_OP  op;    /* and, or, not */
+    value_t     left_operand;
+    value_t     right_operand;
+}
+logical_operation_unit_t;
+
+/* for read() and print() statements (are treated as atomic operations) */
+typedef struct
+{
+    IO_OP    op;            /* READ, PRINT */
+    value_t* values_array;  /* !!!only one value for read */
+}
+io_operation_unit_t;
 
 
 #endif /* PARSER_H */
