@@ -71,9 +71,7 @@ void* pli_realloc(void* old_ptr, size_t new_size, size_t old_size)
         return NULL;
 
     size_t copy_size = (new_size > old_size) ? old_size : new_size;
-
-    if(copy_size > 0)
-        memcpy(new_ptr, old_ptr, copy_size);
+    memcpy(new_ptr, old_ptr, copy_size);
     
     pli_free(old_ptr);
 

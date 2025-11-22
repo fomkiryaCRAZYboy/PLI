@@ -7,108 +7,110 @@
 
 #define MAX_PRINT_ARGS  24
 
-/*
-необходимо создать структуру общего узла base_node_t, в которой будет указатель на base_node_t, который нужно исполнить следующим
-в этой стркутуре будет void* ptr на узел конкретного типа.
-*/
-
-/* 
-предположительно, функция parsing() должна возвращать 
-список AST-узлов (то есть AST-дерево), предназначенных для дальнейшего исполнения 
-AST-узел - структура данных, обозначающая конкретную атомарную операцию, к примеру:
- - "5 + 2"
- - "print(x)"
- - "var x = 1"
-Операция "var tmp = 10 - 3" не является атомарной и будет разбита на:
-1) "10 - 3"  -->  7
-2) "var tmp = 7"
-То есть, var tmp равен результату исполнения предыдущего узла.
-По этому принципу должно строится абстрактное синтаксическое дерево.
-*/
-
-/* node is an atomic operation */
 typedef enum
 {
-    /* variable declaration */
-    VAR_DECLARATION_NODE,     /* var x = "str"; */  /* var x; */
-    /* assignment operation */
-    ASSIGNMENT_OP_NODE,       /* y = 12.4; */
+    /* --- STATEMENTS --- */
+    IF_STATEMENT,       /* if (...) {...} */ 
+                        /* 
+                            if_statement consists of 
+                            'if' keyword,
+                            body_node and condition_node 
+                        */
 
-    /*  all mathematic operations */
-    MATH_OP_NODE,             /* x * 4.3 */
-                              /* 5 / 2 */
-                              /* 113 + 34.45 */
-                              /* 80 - 3 */
+    WHILE_STATEMENT,    /* while (...) {...} */ 
+                        /* 
+                            while_statement consists of 
+                            'while' keyword,
+                            body_node and condition_node 
+                        */
 
-    /* all boolean operations */
-    BINARY_OP_NODE,           /* x > 3 */ 
-                              /* var_x < 23 */ 
-                              /* tmp >= 0 */
-                              /* z <= 0 */
-                              /* x == 0 */
-                              /* x != 0 */
+    READ_STATEMENT,     /* read (<var_name>); */
+                        /*
+                            read_statement consists of
+                            'read' keyword and variable (variable_t)
+                        */
 
-    /* all logical operations */
-    LOGICAL_OP_NODE,           /* and, or, not */
+    PRINT_STATEMENT,    /* print (expression | value | variable); */
+                        /*
+                            print_statement consists of
+                            'print' keyword, expression (expression_t),
+                            value (value_t) or variable (variable_t)
+                        */
 
-    /* read and print statements */
-    IO_OP_NODE                /* read, print */
+    BODY,               /* {...} */
+                        /* body_node can consist of an entire subroutine */
+
+    CONDITION,          /* (<expression>) */ 
+                        /* 
+                            condition for 'if'-branching or 'while'-looping
+                            consists of expression (expression_t)  
+                        */
+
+    VAR_DECLARATION,    /* var <var_name>; */ /* var <var_name> = <expression>; */
+    ASSIGNMENT_OP       /* <var_name> = <expression>; */
 }
 NODE_TYPE ;
 
-/* base node structure */
-typedef struct
+        /* --- BASE NODE ---*/
+typedef struct ast_node
 {
-    NODE_TYPE    node_type;     /* specific node type */
-    void*        specific_node; /* pointer to specific node */
+    NODE_TYPE   node_type;    /* specific node type */
+    void*       spec_node;    /* pointer to a specific node */  
+
+    ast_node_t* next_node;    /* pointer to a BASE NODE that will be executed next */ 
 }
-base_node_t;
+ast_node_t ;
 
+        /* --- SPECIFIC NODES --- */
 
-/* ---specific nodes--- */
-
-/* for declaration and assignment */
-typedef struct
+        /* --- VARIABLE OPERATION node --- */
+/* variable declaration/assignment operation node */
+typedef struct var_operation
 {
-    variable_t* var;         /* declared variable */
-    value_t*    value;       /* assigned value */
+    variable_t*   variable;      /* pointer to variable */
+    expression_t* assign_expr;   /* 
+                                    if "var x;", assign_expr leads to NULL.
+                                    assign_expr can not be NULL in assignment operation 
+                                */
 }
-var_operation_unit_t;
+var_operation_t ;
 
-/* for addition, subtraction, division and multiplication ops */
-typedef struct
+        /* --- CONDITION node --- */
+typedef struct condition
 {
-    MATH_OP  op;    /* +, -, *, / */
-    value_t* left_operand;
-    value_t* right_operand;
+    expression_t* cond_expr;    /* eventually the condition expression will turn into a value_t -> true or false*/
 }
-math_operation_unit_t;
+condition_t ;
 
-/* for compare ops */
-typedef struct
+        /* --- BODY node --- */
+/* subroutine tokens will be recursively passed to the parsing function */
+typedef struct body
 {
-    BIN_OP  op;    /* =, !=, >, <, >=, <= */
-    value_t* left_operand;
-    value_t* right_operand;
+    TOKEN* body_tokens;
 }
-bin_operation_unit_t;
+body_t ;
 
-/* for logical ops */
-typedef struct
+        /* --- PRINT STATEMENT node --- */
+typedef struct print_st
 {
-    LOGICAL_OP  op;    /* and, or, not */
-    value_t     left_operand;
-    value_t     right_operand;
+    expression_t* print_exprs;  /* pointer to the expression(s) to be printed */
+    int expr_count;
 }
-logical_operation_unit_t;
+print_st_t ;
 
-/* for read() and print() statements (are treated as atomic operations) */
-typedef struct
+        /* --- READ STATEMENT node --- */
+typedef struct read_st
 {
-    IO_OP    op;            /* READ, PRINT */
-    value_t* values_array;  /* !!!only one value for read */
+    variable_t* var;  /* pointer to the variable into which the value will be read */
 }
-io_operation_unit_t;
+read_st_t ;
 
+        /* --- IF/WHILE STATEMENT node --- */
+typedef struct if_whwile_statement
+{
+    condition_t* cond;   /* pointer to condition */
+    body_t* body;        /* pointer to body */
+}
+if_while_statement_t;
 
 #endif /* PARSER_H */

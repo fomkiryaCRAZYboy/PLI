@@ -11,15 +11,16 @@
 #endif
 
 int main() {    
-    atexit (print_errors);      /* 
+    atexit (print_errors);      
+                                /* 
                                     If there are no errors, 
                                     the output will be empty.     
                                 */
-    atexit (emergency_cleanup);  /* 
+    atexit (emergency_cleanup); 
+                                /* 
                                     If the memory is not occupied, 
                                     nothing will happen 
                                 */
-                               
     char program[MAX_TOKENS_COUNT_IN_BLOCK];
     memset(program, 0, sizeof(program));
 
@@ -72,6 +73,6 @@ int main() {
 
         pli_free(stream);
     }
-        
+
     exit(EXIT_SUCCESS);
 }

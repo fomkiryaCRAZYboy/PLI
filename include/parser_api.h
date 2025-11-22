@@ -4,9 +4,7 @@
 #include "lexer.h"
 #include "parser.h"
 
-base_node_t* parsing(TOKEN_STREAM* stream);/* main parsing function, that return nodes array
-                                      the parsing function takes a stream of tokens as an argument 
-                                      */
+int parsing(TOKEN_STREAM* stream);
                                      
 /* print operation helper funcs */
 int print_statement_handling(TOKEN* tokens, int* iter);

@@ -11,32 +11,43 @@
 
 
 /* data types for literals and variables */
-typedef enum  { 
+typedef enum { 
                 INT_TYPE, 
                 FLOAT_TYPE, 
                 BOOL_TYPE, 
                 STR_TYPE, 
                 NONE_TYPE     /* NONE_TYPE for newly declared variables: "var x;" */
-              } 
+             } 
 DATA_TYPE ;
-            
+          
 /* value pattern */
-typedef union
+typedef union value
 {
         int64_t int_value;
         double  float_value;
         char    str_value[MAX_STR_SIZE];
-        int     bool_value;    
+        short   bool_value;    
 }
 value_t ;
 
 /* variable pattern */
-typedef struct
+typedef struct variable
 {
     char      var_name[MAX_VAR_SIZE];
     DATA_TYPE var_data_type;
     value_t   var_value;
 }
 variable_t ;
+
+/* expression pattern */
+/* eventually the expression will turn into a value_t */
+typedef struct expression
+{
+    TOKEN* expr;    /* 
+                        pointer to a token (stream of tokens) 
+                        defining the expression
+                    */
+}
+expression_t;
 
 #endif /* VAR_H */
