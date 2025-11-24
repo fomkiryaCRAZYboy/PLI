@@ -53,7 +53,7 @@ typedef enum
 {
     #ifdef  DECODE_w
     #undef  DECODE_w
-    #endif
+    #endifu
 
     #define DECODE_w(code, description) code,
     WARNINGS
