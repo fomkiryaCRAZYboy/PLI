@@ -1,6 +1,7 @@
 #include "parser_api.h"
 #include "lexer.h"
 #include "errs.h"
+#include "parser.h"
 
 /* root of AST-Tree */
 ast_node_t* ast_tree = NULL ;

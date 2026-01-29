@@ -57,7 +57,7 @@ typedef struct ast_node
     NODE_TYPE   node_type;    /* specific node type */
     void*       spec_node;    /* pointer to a specific node */  
 
-    ast_node_t* next_node;    /* pointer to a BASE NODE that will be executed next */ 
+    struct ast_node_t* next_node;    /* pointer to a BASE NODE that will be executed next */ 
 }
 ast_node_t ;
 
