@@ -1,18 +1,18 @@
-program = {statement} "end" ";";
+program = {statement};
 
 statement = declaration | assignment | if_statement | while_statement | print_statement | read_statement;
 
-declaration = "var" identifier "=" expression ";";
-assignment = identifier "=" expression ";";
+declaration = "var" identifier "=" expression;
+assignment = identifier "=" expression;
 if_statement = "if" "(" expression ")" "{" {statement} "}" ["else" "{" {statement} "}"];
 while_statement = "while" "(" expression ")" "{" {statement} "}";
-print_statement = "print" "(" expression { "," expression } ")" ";";
-read_statement = "read" "(" identifier ")" ";";
+print_statement = "print" "(" expression { "," expression } ")";
+read_statement = "read" "(" identifier ")";
 
 expression = comparison { ("and" | "or") comparison };
 comparison = term { ("==" | "!=" | "<" | ">" | "<=" | ">=") term };
 term = factor { ("+" | "-") factor };
-factor = unary { ("*" | "/") unary };
+factor = unary { ("*" | "/" | "%") unary };
 unary = ["-" | "not"] primary;
 primary = number | string | boolean | identifier | "(" expression ")";
 

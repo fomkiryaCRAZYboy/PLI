@@ -1,12 +1,11 @@
-var count = 0;
-var max = 5;
+var count = 0
+var max = 5
 
 while (count < max) {
     if (count % 2 == 0) {
-        print(count, " - четное");
+        print(count, " - четное")
     } else {
-        print(count, " - нечетное");
+        print(count, " - нечетное")
     }
-    count = count + 1;
+    count = count + 1
 }
-end;

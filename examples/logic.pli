@@ -1,10 +1,9 @@
-var a = true;
-var b = false;
-var c = a and b;
-var d = a or b;
-var e = not a;
+var a = true
+var b = false
+var c = a and b
+var d = a or b
+var e = not a
 
 if (c == false) {
-    print("c is false");
+    print("c is false")
 }
-end;

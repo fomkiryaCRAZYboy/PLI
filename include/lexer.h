@@ -28,14 +28,13 @@ typedef enum
     kw_token_and  ,     /* 'and'   - logical operator */
     kw_token_or   ,     /* 'or'    - logical operator */
     kw_token_not  ,     /* 'not'   - logical operator */
-    kw_token_end  ,     /* 'end'   - program termination */
 
     /* --- IDENTIFIERS --- */
     iden_token,          /* identifier - variable, e.g.: 'x', 'count', 'my_var' */
 
     /* --- LITERALS --- */
     str_token   ,        /* string literal, e.g. : '"hello"', '"world"' */
-    num_token   ,        /* number literal, e.g. : '42', '3.14', '-10' */
+    num_token   ,        /* number literal, e.g. : '42', '3.14', '10' */
     bool_token_t,        /* boolean true, e.g.   : 'true' */
     bool_token_f,        /* boolean false, e.g.  : 'false' */
     
@@ -44,6 +43,8 @@ typedef enum
     math_op_token_div  ,   /* division, e.g.      : '/' */
     math_op_token_plus ,   /* addition, e.g.      : '+' */
     math_op_token_minus,   /* subtraction, e.g.   : '-' */
+    math_op_token_percent,   /* remainder from division, e.g.   : '%' */
+
 
     /* --- ASSIGNMENT OPERATOR --- */
     assing_op_token,     /* assignment, e.g.      : '=' */
@@ -68,7 +69,6 @@ typedef enum
     sep_token_rbracket ,       /* right bracket, e.g.     : ']' */
 #endif    
     sep_token_comma    ,       /* comma, e.g.             : ',' */
-    sep_token_semicolon,       /* semicolon, e.g.         : ';' */ 
     sep_token_dot      ,       /* dot, e.g.               : '.' */
 
 

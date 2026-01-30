@@ -1,5 +1,5 @@
-#ifndef BASE_H
-#define BASE_H
+#ifndef MEM_H
+#define MEM_H
 
 #include <stddef.h>
 
@@ -16,4 +16,4 @@ void emergency_cleanup() ;
 void pli_free(void* ptr) ;
 void* pli_realloc(void* old_ptr, size_t new_size, size_t old_size);
 
-#endif /* BASE_H */
+#endif /* MEM_H */

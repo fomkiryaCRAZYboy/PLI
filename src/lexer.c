@@ -21,7 +21,7 @@ static TOKEN_TYPE text_to_token_type(char* token_text)
             break;
         case 'e':
             if(strcmp(token_text, "else") == 0) return kw_token_else;
-            if(strcmp(token_text, "end") == 0) return kw_token_end;
+            /*if(strcmp(token_text, "end") == 0) return kw_token_end;*/
             break;
         case 'f':
             if(strcmp(token_text, "false") == 0) return bool_token_f;
@@ -81,6 +81,7 @@ static TOKEN_TYPE operator_to_token_type(char* op_sep_text)
         case '/': return math_op_token_div;
         case '+': return math_op_token_plus;
         case '-': return math_op_token_minus;
+        case '%': return math_op_token_percent;
 
         /* Assignment operator */
         case '=': return assing_op_token;
@@ -95,7 +96,7 @@ static TOKEN_TYPE operator_to_token_type(char* op_sep_text)
         case '{': return sep_token_lbrace;
         case '}': return sep_token_rbrace;
         case ',': return sep_token_comma;
-        case ';': return sep_token_semicolon;
+        /*case ';': return sep_token_semicolon;*/
         case '.': return sep_token_dot;
 
         default:
@@ -128,6 +129,9 @@ char* get_op_sep_token(char** line_ptr, int current_line)
     case '-':
         sep_op_token[0] = '-';
         goto one_sym;
+    case '%':
+        sep_op_token[0] = '%';
+        goto one_sym;
     case '=':
         if(current[1] == '=') goto two_sym;
         
@@ -158,9 +162,9 @@ char* get_op_sep_token(char** line_ptr, int current_line)
     case ',':
         sep_op_token[0] = ',';
         goto one_sym;
-    case ';':
+    /*case ';':
         sep_op_token[0] = ';';
-        goto one_sym;
+        goto one_sym;*/
     case '.':
         sep_op_token[0] = '.';
         goto one_sym;
@@ -501,7 +505,6 @@ TOKEN_STREAM* tokenize(char* block)
         if(*line_ptr == '\0') 
             break; 
 
-        /* starts from '+'/'-'/digit --> number*/  
         /* numbers handling */  
         if(isdigit (*line_ptr)) 
         {

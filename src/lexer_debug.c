@@ -13,7 +13,7 @@ const char* get_type_of_token(TOKEN_TYPE type) {
         case kw_token_and:        return "KW_AND";
         case kw_token_or:         return "KW_OR";
         case kw_token_not:        return "KW_NOT";
-        case kw_token_end:        return "KW_END";
+        /*case kw_token_end:        return "KW_END";*/
 
         /* --- IDENTIFIERS --- */
         case iden_token:          return "ID";
@@ -29,6 +29,7 @@ const char* get_type_of_token(TOKEN_TYPE type) {
         case math_op_token_div:   return "OP_DIV";
         case math_op_token_plus:  return "OP_PLUS";
         case math_op_token_minus: return "OP_MINUS";
+        case math_op_token_percent: return "OP_PERC";
 
         /* --- ASSIGNMENT OPERATOR --- */
         case assing_op_token:     return "OP_ASSIGN";
@@ -47,7 +48,7 @@ const char* get_type_of_token(TOKEN_TYPE type) {
         case sep_token_lbrace:    return "SEP_LBRACE";
         case sep_token_rbrace:    return "SEP_RBRACE";
         case sep_token_comma:     return "SEP_COMMA";
-        case sep_token_semicolon: return "SEP_SEMICOL";
+        /*case sep_token_semicolon: return "SEP_SEMICOL";*/
         case sep_token_dot:       return "SEP_DOT";
 
         /* --- SPECIAL --- */

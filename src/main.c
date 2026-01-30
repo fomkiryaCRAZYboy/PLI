@@ -7,7 +7,7 @@
 #include <stdlib.h>
 
 #ifdef FILE_INPUT
-#define input_file "/home/user/kirill/PLI/test_lexer_main/input8.pli"
+#define input_file "/home/user/kirill/PLI/test_lexer_main/input1.pli"
 #endif
 
 int main() {    
@@ -54,6 +54,42 @@ int main() {
     }
     
     fclose(input_f);
+    program[total_read] = '\0';
+#else  /* interactive input */
+    printf("Enter your PLI program (empty line to finish):\n> ");
+    
+    size_t total_read = 0;
+    char buffer[1024];
+    
+    while(fgets(buffer, sizeof(buffer), stdin) != NULL && total_read < MAX_TOKENS_COUNT_IN_BLOCK - 1)
+    {
+        /* Check if line is empty (only newline or whitespace) */
+        int is_empty = 1;
+        for(char* p = buffer; *p; p++) {
+            if(*p != '\n' && *p != ' ' && *p != '\t' && *p != '\r') {
+                is_empty = 0;
+                break;
+            }
+        }
+        
+        if(is_empty && total_read > 0)
+            break;
+        
+        size_t line_length = strlen(buffer);
+        size_t available = MAX_TOKENS_COUNT_IN_BLOCK - total_read - 1;
+        
+        if(line_length > available)
+            line_length = available;
+        
+        memcpy(program + total_read, buffer, line_length);
+        total_read += line_length;
+        
+        if(total_read >= MAX_TOKENS_COUNT_IN_BLOCK - 1)
+            break;
+
+        printf("> ");
+    }
+    
     program[total_read] = '\0';
 #endif /* FILE_INPUT */
 
