@@ -91,7 +91,7 @@ TOKEN_TEXT ;
 typedef struct token
 {
     TOKEN_TEXT text_token ;
-    TOKEN_TYPE type_token  ;
+    TOKEN_TYPE type_token ;
     int line_number ;        /* Line number where token was found */
 } 
 TOKEN ;

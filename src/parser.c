@@ -1,22 +1,15 @@
-#include "parser_api.h"
 #include "lexer.h"
-#include "errs.h"
-#include "parser.h"
+#include "stdio.h"
 
-/* root of AST-Tree */
-ast_node_t* ast_tree = NULL ;
-
-int parsing(TOKEN_STREAM* stream)
+/* main parse function. it has one parameter - tokens stream returned by tokenize() func. */
+int parse(TOKEN_STREAM* stream)
 {
-    int iter;
-
-    /* main parsing cycle, it iterates over the program's token stream */
-    for(iter = 0; iter < stream -> count; ++iter)
+    for (int i = 0; i < stream->count; ++i)
     {
-        if(stream -> tokens[iter].type_token == kw_token_print)
+        switch (stream ->tokens[i].type_token)
         {
-            /* add to AST-Tree print_statement node */
-            print_statement_handling(stream -> tokens, &iter);
+            case kw_token_var: printf("varrf\n"); return 0;
+            default: return 1;
         }
     }
 }

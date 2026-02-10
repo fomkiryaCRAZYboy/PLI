@@ -1,53 +1,47 @@
 #ifndef VAR_H
 #define VAR_H
 
-#include "stdint.h"
-#include "parser.h"
+#include "lexer.h"
+#include <stdint.h>
+#include <stdbool.h>
 
 #define MAX_STR_SIZE    MAX_TOKEN_TEXT_SIZE
 #define MAX_VAR_SIZE    MAX_TOKEN_TEXT_SIZE
 
-/* ---any extra information about literals and variables--- */
+/* ============================================================================
+ * RUNTIME VALUE TYPES (for interpreter/evaluator)
+ * ============================================================================ */
 
+/* Data types for runtime values */
+typedef enum 
+{ 
+    VAL_INT,       /* Integer value */
+    VAL_FLOAT,     /* Floating-point value */
+    VAL_BOOL,      /* Boolean value */
+    VAL_STRING,    /* String value */
+    VAL_NONE       /* Uninitialized/undefined value */
+} value_type_t;
 
-/* data types for literals and variables */
-typedef enum { 
-                INT_TYPE, 
-                FLOAT_TYPE, 
-                BOOL_TYPE, 
-                STR_TYPE, 
-                NONE_TYPE     /* NONE_TYPE for newly declared variables: "var x;" */
-             } 
-DATA_TYPE ;
-          
-/* value pattern */
-typedef union value
+/* Runtime value union */
+typedef union
 {
-        int64_t int_value;
-        double  float_value;
-        char    str_value[MAX_STR_SIZE];
-        short   bool_value;    
-}
-value_t ;
+    int64_t int_val;
+    double  float_val;
+    bool    bool_val;
+    char    string_val[MAX_STR_SIZE];
+} runtime_value_t;
 
-/* variable pattern */
-typedef struct variable
-{
-    char      var_name[MAX_VAR_SIZE];
-    DATA_TYPE var_data_type;
-    value_t   var_value;
-}
-variable_t ;
+/* Runtime value with type tag */
+typedef struct {
+    value_type_t    type;
+    runtime_value_t value;
+} value_t;
 
-/* expression pattern */
-/* eventually the expression will turn into a value_t */
-typedef struct expression
-{
-    TOKEN* expr;    /* 
-                        pointer to a token (stream of tokens) 
-                        defining the expression
-                    */
-}
-expression_t;
+/* Variable entry (for variable storage) */
+typedef struct {
+    char    name[MAX_VAR_SIZE];
+    value_t value;
+    bool    is_initialized;
+} variable_t;
 
 #endif /* VAR_H */

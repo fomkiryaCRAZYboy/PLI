@@ -3,114 +3,199 @@
 
 #include "lexer.h"
 #include "var.h"
-#include "ops.h"
 
+#include <stdbool.h>
+
+/* Maximum number of arguments in print() */
 #define MAX_PRINT_ARGS  24
 
-typedef enum
+/* Forward declarations */
+typedef struct expr_node expr_node_t;
+typedef struct stmt_node stmt_node_t;
+
+/* ============================================================================
+ * EXPRESSION AST NODES
+ * ============================================================================ */
+
+/* Expression node types */
+typedef enum 
 {
-    /* --- STATEMENTS --- */
-    IF_STATEMENT,       /* if (...) {...} */ 
-                        /* 
-                            if_statement consists of 
-                            'if' keyword,
-                            body_node and condition_node 
-                        */
+    EXPR_BINARY,       /* Binary operation: <left> <op> <right> */
+    EXPR_UNARY,        /* Unary operation: <op> <operand> */
+    EXPR_LITERAL,      /* Literal value: number, string, boolean */
+    EXPR_VARIABLE,     /* Variable reference */
+    EXPR_GROUPING      /* Grouped expression: (expr) */
+} expr_type_t;
 
-    WHILE_STATEMENT,    /* while (...) {...} */ 
-                        /* 
-                            while_statement consists of 
-                            'while' keyword,
-                            body_node and condition_node 
-                        */
-
-    READ_STATEMENT,     /* read (<var_name>); */
-                        /*
-                            read_statement consists of
-                            'read' keyword and variable (variable_t)
-                        */
-
-    PRINT_STATEMENT,    /* print (expression | value | variable); */
-                        /*
-                            print_statement consists of
-                            'print' keyword, expression (expression_t),
-                            value (value_t) or variable (variable_t)
-                        */
-
-    BODY,               /* {...} */
-                        /* body_node can consist of an entire subroutine */
-
-    CONDITION,          /* (<expression>) */ 
-                        /* 
-                            condition for 'if'-branching or 'while'-looping
-                            consists of expression (expression_t)  
-                        */
-
-    VAR_DECLARATION,    /* var <var_name>; */ /* var <var_name> = <expression>; */
-    ASSIGNMENT_OP       /* <var_name> = <expression>; */
-}
-NODE_TYPE ;
-
-        /* --- BASE NODE ---*/
-typedef struct ast_node
+/* Binary operators */
+typedef enum 
 {
-    NODE_TYPE   node_type;    /* specific node type */
-    void*       spec_node;    /* pointer to a specific node */  
+    /* Logical operators */
+    OP_AND,            /* and */
+    OP_OR,             /* or */
+    
+    /* Comparison operators */
+    OP_EQUAL,          /* == */
+    OP_NOT_EQUAL,      /* != */
+    OP_LESS,           /* < */
+    OP_GREATER,        /* > */
+    OP_LESS_EQUAL,     /* <= */
+    OP_GREATER_EQUAL,  /* >= */
+    
+    /* Arithmetic operators */
+    OP_ADD,            /* + */
+    OP_SUBTRACT,       /* - */
+    OP_MULTIPLY,       /* * */
+    OP_DIVIDE,         /* / */
+    OP_MODULO          /* % */
+} binary_op_t;
 
-    struct ast_node_t* next_node;    /* pointer to a BASE NODE that will be executed next */ 
-}
-ast_node_t ;
+/* Unary operators */
+typedef enum {
+    OP_NEGATE,         /* - (arithmetic negation) */
+    OP_NOT             /* not (logical negation) */
+} unary_op_t;
 
-        /* --- SPECIFIC NODES --- */
+/* Literal value types */
+typedef enum {
+    LIT_NUMBER,        /* Integer or float */
+    LIT_STRING,        /* String literal */
+    LIT_BOOLEAN        /* true or false */
+} literal_type_t;
 
-        /* --- VARIABLE OPERATION node --- */
-/* variable declaration/assignment operation node */
-typedef struct var_operation
-{
-    variable_t*   variable;      /* pointer to variable */
-    expression_t* assign_expr;   /* 
-                                    if "var x;", assign_expr leads to NULL.
-                                    assign_expr can not be NULL in assignment operation 
-                                */
-}
-var_operation_t ;
+/* Literal value union */
+typedef union {
+    double number;                      /* For both int and float */
+    char string[MAX_STR_SIZE];   /* String value */
+    bool boolean;                       /* Boolean value */
+} literal_value_t;
 
-        /* --- CONDITION node --- */
-typedef struct condition
-{
-    expression_t* cond_expr;    /* eventually the condition expression will turn into a value_t -> true or false*/
-}
-condition_t ;
+/* Binary expression node */
+typedef struct {
+    binary_op_t  op;
+    expr_node_t* left;
+    expr_node_t* right;
+} binary_expr_t;
 
-        /* --- BODY node --- */
-/* subroutine tokens will be recursively passed to the parsing function */
-typedef struct body
-{
-    TOKEN* body_tokens;
-}
-body_t ;
+/* Unary expression node */
+typedef struct {
+    unary_op_t   op;
+    expr_node_t* operand;
+} unary_expr_t;
 
-        /* --- PRINT STATEMENT node --- */
-typedef struct print_st
-{
-    expression_t* print_exprs;  /* pointer to the expression(s) to be printed */
-    int expr_count;
-}
-print_st_t ;
+/* Literal expression node */
+typedef struct {
+    literal_type_t  type;
+    literal_value_t value;
+} literal_expr_t;
 
-        /* --- READ STATEMENT node --- */
-typedef struct read_st
-{
-    variable_t* var;  /* pointer to the variable into which the value will be read */
-}
-read_st_t ;
+/* Variable reference node */
+typedef struct {
+    char name[MAX_VAR_SIZE];
+} variable_expr_t;
 
-        /* --- IF/WHILE STATEMENT node --- */
-typedef struct if_whwile_statement
-{
-    condition_t* cond;   /* pointer to condition */
-    body_t* body;        /* pointer to body */
-}
-if_while_statement_t;
+/* Grouping expression node */
+typedef struct {
+    expr_node_t* expression;
+} grouping_expr_t;
+
+/* Main expression node (tagged union) */
+struct expr_node {
+    expr_type_t type;
+    union {
+        binary_expr_t   binary;
+        unary_expr_t    unary;
+        literal_expr_t  literal;
+        variable_expr_t variable;
+        grouping_expr_t grouping;
+    } expr;
+};
+
+/* ============================================================================
+ * STATEMENT AST NODES
+ * ============================================================================ */
+
+/* Statement node types */
+typedef enum {
+    STMT_VAR_DECL,     /* var x = expr */
+    STMT_ASSIGNMENT,   /* x = expr */
+    STMT_IF,           /* if (expr) { stmts } [else { stmts }] */
+    STMT_WHILE,        /* while (expr) { stmts } */
+    STMT_PRINT,        /* print(expr, expr, ...) */
+    STMT_READ,         /* read(x) */
+    STMT_BLOCK         /* { stmts } */
+} stmt_type_t;
+
+/* Variable declaration statement */
+typedef struct {
+    char var_name[MAX_VAR_SIZE];
+    expr_node_t* initializer;  /* Expression to initialize variable */
+} var_decl_stmt_t;
+
+/* Assignment statement */
+typedef struct {
+    char var_name[MAX_VAR_SIZE];
+    expr_node_t* value;  /* Expression to assign */
+} assignment_stmt_t;
+
+/* If statement */
+typedef struct {
+    expr_node_t* condition;
+    stmt_node_t* then_branch;      /* Block or single statement */
+    stmt_node_t* else_branch;      /* NULL if no else clause */
+} if_stmt_t;
+
+/* While statement */
+typedef struct {
+    expr_node_t* condition;
+    stmt_node_t* body;  /* Block or single statement */
+} while_stmt_t;
+
+/* Print statement */
+typedef struct {
+    expr_node_t** expressions;  /* Array of expressions to print */
+    int expr_count;             /* Number of expressions */
+} print_stmt_t;
+
+/* Read statement */
+typedef struct {
+    char var_name[MAX_VAR_SIZE];
+} read_stmt_t;
+
+/* Block statement */
+typedef struct {
+    stmt_node_t** statements;  /* Array of statements in block */
+    int stmt_count;            /* Number of statements */
+} block_stmt_t;
+
+/* Main statement node (tagged union) */
+struct stmt_node {
+    stmt_type_t type;
+    union {
+        var_decl_stmt_t var_decl;
+        assignment_stmt_t assignment;
+        if_stmt_t if_stmt;
+        while_stmt_t while_stmt;
+        print_stmt_t print_stmt;
+        read_stmt_t read_stmt;
+        block_stmt_t block;
+    } as;
+    
+    stmt_node_t* next;  /* For statement sequences (linked list) */
+};
+
+/* ============================================================================
+ * PROGRAM (root of AST)
+ * ============================================================================ */
+
+/* Program node - root of AST tree */
+typedef struct {
+    stmt_node_t** statements;  /* Array of top-level statements */
+    int stmt_count;            /* Number of statements */
+} program_t;
+
+
+/* DEBUG */
+void print_ast(program_t* program);
 
 #endif /* PARSER_H */

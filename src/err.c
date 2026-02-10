@@ -1,7 +1,11 @@
 #include "errs.h"
+#include "mem.h"
 
 #include <stdbool.h>
 #include <stdio.h>
+#include <errno.h>
+#include <string.h>
+#include <stdlib.h>
 
 static int errors_count = 0;
 err_code errors_array[MAX_FAILS];
@@ -55,7 +59,7 @@ void add_err_code(int err_code, int line_num, bool warning)
 }
 
 /* it will be called by atexit() */
-void print_errors()
+void print_errors(void)
 {
     int i;
     for(i = 0; i < errors_count; ++i)
@@ -75,4 +79,27 @@ void print_errors()
                    decode_err(errors_array[i].err_code, false));
         }
     }
+}
+
+int atexit_registration(void)
+{
+    /*
+     * If there are no errors, the output will be empty.
+     */
+    if (atexit(print_errors) != 0) 
+    {
+        fprintf(stderr, "atexit(print_errors) failed: %s\n", strerror(errno));
+        return -1;
+    }
+
+    /*
+     * If the memory is not occupied, nothing will happen.
+     */
+    if (atexit(emergency_cleanup) != 0) 
+    {
+        fprintf(stderr, "atexit(emergency_cleanup) failed: %s\n", strerror(errno));
+        return -1;
+    }
+
+    return 0;
 }

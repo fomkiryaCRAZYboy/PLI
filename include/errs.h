@@ -88,7 +88,8 @@ typedef struct
 err_code ;
 
 void add_err_code(int error_code, int line_num, bool warning);
-void print_errors();
+void print_errors(void);
 char* decode_err(int error_code, bool warning);
+int atexit_registration(void);
 
 #endif /* ERR_H */

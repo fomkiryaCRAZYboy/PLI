@@ -27,5 +27,3 @@ PLI_mem_test_start:
 
 clean:
 	rm -rf $(BIN_DIR)/*
-
-.PHONY: clean

@@ -1,6 +1,7 @@
+#include "errs.h"
 #include "lexer.h"
 #include "mem.h"
-#include "main_head.h"
+#include "parser_api.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -10,17 +11,10 @@
 #define input_file "/home/user/kirill/PLI/test_lexer_main/input1.pli"
 #endif
 
-int main() {    
-    atexit (print_errors);      
-                                /* 
-                                    If there are no errors, 
-                                    the output will be empty.     
-                                */
-    atexit (emergency_cleanup); 
-                                /* 
-                                    If the memory is not occupied, 
-                                    nothing will happen 
-                                */
+int main() {
+    int ret = atexit_registration();
+    if (ret != 0) exit(EXIT_FAILURE);
+
     char program[MAX_TOKENS_COUNT_IN_BLOCK];
     memset(program, 0, sizeof(program));
 
@@ -101,6 +95,8 @@ int main() {
     }
 
     debug_print_stream(stream);
+
+    parse(stream);
 
     if(stream)
     {
