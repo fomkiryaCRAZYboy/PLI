@@ -103,11 +103,11 @@ typedef struct {
 struct expr_node {
     expr_type_t type;
     union {
-        binary_expr_t   binary;
-        unary_expr_t    unary;
-        literal_expr_t  literal;
-        variable_expr_t variable;
-        grouping_expr_t grouping;
+        binary_expr_t*   binary;
+        unary_expr_t*    unary;
+        literal_expr_t*  literal;
+        variable_expr_t* variable;
+        grouping_expr_t* grouping;
     } expr;
 };
 
@@ -172,13 +172,13 @@ typedef struct {
 struct stmt_node {
     stmt_type_t type;
     union {
-        var_decl_stmt_t var_decl;
-        assignment_stmt_t assignment;
-        if_stmt_t if_stmt;
-        while_stmt_t while_stmt;
-        print_stmt_t print_stmt;
-        read_stmt_t read_stmt;
-        block_stmt_t block;
+        var_decl_stmt_t* var_decl;
+        assignment_stmt_t* assignment;
+        if_stmt_t* if_stmt;
+        while_stmt_t* while_stmt;
+        print_stmt_t* print_stmt;
+        read_stmt_t* read_stmt;
+        block_stmt_t* block;
     } as;
     
     stmt_node_t* next;  /* For statement sequences (linked list) */
@@ -190,7 +190,7 @@ struct stmt_node {
 
 /* Program node - root of AST tree */
 typedef struct {
-    stmt_node_t** statements;  /* Array of top-level statements */
+    stmt_node_t* statements;   /* ptr to first stmt in linked list of statements */
     int stmt_count;            /* Number of statements */
 } program_t;
 

@@ -42,6 +42,18 @@
         DECODE(GET_SEP_OP_TOKEN_func_ALLOC_ERROR,            "SepOpTokenAllocError") \
         DECODE(GET_SEP_OP_TOKEN_func_INVALID_SEP_OP_ERROR,   "InvalidSepOpError") \
         \
+        DECODE(PARSE_func_CRAETE_VAR_DECL_STMT_ERROR,        "VarDelarationStatementCreationError") \
+        DECODE(PARSE_func_STMT_CREATION_ERROR,               "StatementCreationError") \
+        \
+        DECODE(CREATE_VAR_DECL_STMT_func_FIRST_TOKEN_NOT_VAR_ERROR,      "MissingVarKeyWordError") \
+        DECODE(CREATE_VAR_DECL_STMT_func_SECOND_TOKEN_NOT_IDEN_ERROR,    "MissingIdentifierError") \
+        DECODE(CREATE_VAR_DECL_STMT_func_THIRD_TOKEN_NOT_ASSIGN_ERROR,   "MissingAssignmentSignError") \
+        DECODE(CREATE_VAR_DECL_STMT_func_INITIALIZER_PARSE_ERROR,        "InitializerParseError") \
+        \
+        DECODE(CREATE_EXPR_NODE_func_INVALID_EXPRESSION,                 "InvalidExpressionError") \
+        \
+        DECODE(CREATE_STMT_func_UNKNOWN_STMT_TYPE,                       "UnknownStatementType") \
+        \
         DECODE(PARSING_func_MISSING_LPAREN_PRINT_ST_ERROR,   "MissingOpeningParenthesisError") \
         DECODE(PARSING_func_INVALID_ARG_PRINT_ST_ERROR,      "InvalidPrintArgumentError") \
         \
