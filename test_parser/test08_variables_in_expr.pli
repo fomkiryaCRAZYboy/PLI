@@ -1,0 +1,4 @@
+var x = 10
+var y = x + 5
+var z = x * y
+var w = (x + y) * z

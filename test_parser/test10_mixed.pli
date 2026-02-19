@@ -1,0 +1,6 @@
+var name = "PLI"
+var version = 1
+var pi = 3.14
+var is_ready = true
+var total = pi * version + 100
+var ok = total > 0 and is_ready == true

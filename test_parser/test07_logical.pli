@@ -1,0 +1,4 @@
+var a = true and false
+var b = true or false
+var c = true and true or false
+var d = not true or false

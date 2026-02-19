@@ -8,7 +8,7 @@
 #include <stdlib.h>
 
 #ifdef FILE_INPUT
-#define input_file "/home/user/kirill/PLI/test_lexer_main/input1.pli"
+#define input_file "/home/user/kirill/PLI/test_parser/test01_simple_literals.pli"
 #endif
 
 int main() {
@@ -96,7 +96,12 @@ int main() {
 
     debug_print_stream(stream);
 
-    parse(stream);
+    program_t* ast = parse(stream);
+
+    //pli_free(stream->tokens);
+    //pli_free(stream);
+
+    print_ast(ast);
 
     if(stream)
     {

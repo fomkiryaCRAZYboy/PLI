@@ -74,7 +74,7 @@ static void add_stmt_to_list(stmt_node_t* stmt, program_t* program)
     {
         /* find the last stmt in list */
         stmt_node_t* curr = program -> statements;
-        while(!curr -> next)
+        while(curr -> next)
             curr = curr -> next;
 
         curr -> next = stmt;
@@ -145,27 +145,64 @@ program_t* parse(TOKEN_STREAM* stream)
     program -> stmt_count = 0;
     program -> statements = NULL;
 
-    for (int idx = 0; idx < stream->count; ++idx)
+    int pos = 0;
+    while(pos < (int)stream->count)
     {
-        switch (stream ->tokens[idx].type_token)
+        switch (stream->tokens[pos].type_token)
         {
             case kw_token_var:
             {
-                var_decl_stmt_t* var_decl_stmt = create_var_decl_stmt(stream, idx);
+                int stmt_line = stream->tokens[pos].line_number;
+                var_decl_stmt_t* var_decl_stmt = create_var_decl_stmt(stream, &pos);
                 if(!var_decl_stmt)
                 {
-                    add_err_code(PARSE_func_CRAETE_VAR_DECL_STMT_ERROR, stream -> tokens[idx].line_number, false);
+                    add_err_code(PARSE_func_CRAETE_VAR_DECL_STMT_ERROR,
+                                   stmt_line,
+                                    false);
                     return NULL;
                 }
-                stmt_node_t* stmt = create_stmt(var_decl_stmt, STMT_VAR_DECL, stream -> tokens[idx].line_number);
+
+                stmt_node_t* stmt = create_stmt(var_decl_stmt, STMT_VAR_DECL, stmt_line);
                 if(!stmt)
                 {
-                    add_err_code(PARSE_func_STMT_CREATION_ERROR, stream -> tokens[idx].line_number, false);
+                    add_err_code(PARSE_func_STMT_CREATION_ERROR,
+                                   stmt_line,
+                                    false);
                     return NULL;
                 }
 
                 add_stmt_to_list(stmt, program);
                 break;
+            }
+
+            case iden_token:
+            {
+                int stmt_line = stream->tokens[pos].line_number;
+                assignment_stmt_t* assignment_stmt = create_assignment_stmt(stream, &pos);
+                if(!assignment_stmt)
+                {
+                    add_err_code(PARSE_func_CRAETE_ASSIGNMENT_STMT_ERROR,
+                        stmt_line,
+                        false);
+                    return NULL;
+                }
+
+                stmt_node_t* stmt = create_stmt(assignment_stmt, STMT_ASSIGNMENT, stmt_line);
+                if(!stmt)
+                {
+                    add_err_code(PARSE_func_STMT_CREATION_ERROR,
+                                   stmt_line,
+                                    false);
+                    return NULL;
+                }
+
+                add_stmt_to_list(stmt, program);
+                break;
+            }
+
+            case kw_token_if:
+            {
+
             }
             default: 
                 return NULL;

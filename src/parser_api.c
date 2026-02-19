@@ -8,78 +8,110 @@
 #include <stdbool.h>
 #include <string.h>
 
+#define INC_POS(pos) (++(*pos))
+
 void* error_handling(int err_code, int line_num, bool is_warn)
 {
     add_err_code(err_code, line_num, is_warn);
     return NULL;
 }
 
-static bool is_valid_expr(TOKEN_STREAM* stream, int position)
+var_decl_stmt_t* create_var_decl_stmt(TOKEN_STREAM* stream, int* pos)
 {
-    /* if line num increases, there is an error */
-    int curr_line = stream ->tokens[position].line_number;
-    int count = position
+    if(stream->tokens[*pos].type_token != kw_token_var)
+        return error_handling(CREATE_VAR_DECL_STMT_func_FIRST_TOKEN_NOT_VAR_ERROR,
+                              stream->tokens[*pos].line_number,
+                               false);
 
-    while()
+    INC_POS(pos);
 
-    return true;
-}
-
-#if 0
-static void copy_token(TOKEN* src_token, TOKEN* dest_token)
-{
-    dest_token -> type_token = src_token -> type_token;
-    dest_token -> line_number = src_token -> line_number;
-    dest_token -> text_token = src_token -> text_token;
-    return ;
-}
-#endif
-
-var_decl_stmt_t* create_var_decl_stmt(TOKEN_STREAM* stream, int position)
-{
-    /* the first token must be 'kw_token_var', second token must be 'iden_token', third token must be 'assing_op_token'*/
-    if(stream->tokens[position].type_token != kw_token_var)
-        /* error, the first token is not 'kw_token_var' */
-        return error_handling(CREATE_VAR_DECL_STMT_func_FIRST_TOKEN_NOT_VAR_ERROR, stream->tokens[position].line_number, false);
-
-    if(stream->tokens[++position].type_token != iden_token)
-        /* error, second token is not 'iden_token' */
-        return error_handling(CREATE_VAR_DECL_STMT_func_SECOND_TOKEN_NOT_IDEN_ERROR, stream->tokens[position].line_number, false);
+    if(*pos >= (int)stream->count || stream->tokens[*pos].type_token != iden_token)
+        return error_handling(CREATE_VAR_DECL_STMT_func_SECOND_TOKEN_NOT_IDEN_ERROR,
+                              stream->tokens[*pos - 1].line_number,
+                               false);
     
     var_decl_stmt_t* var_decl_stmt = pli_alloc(sizeof(var_decl_stmt_t));
     if(!var_decl_stmt)
-        return error_handling(MEMORY_ALLOCATION_ERROR, stream->tokens[position].line_number, false);
+        return error_handling(MEMORY_ALLOCATION_ERROR,
+                              stream->tokens[*pos].line_number,
+                               false);
 
-    strncpy(var_decl_stmt->var_name, stream->tokens[position].text_token.text, MAX_VAR_SIZE);
+    strncpy(var_decl_stmt->var_name, stream->tokens[*pos].text_token.text, MAX_VAR_SIZE);
 
-    if(stream->tokens[++position].type_token != assing_op_token)
-        /* error, third token is not 'assing_op_token' */
-        return error_handling(CREATE_VAR_DECL_STMT_func_THIRD_TOKEN_NOT_ASSIGN_ERROR, stream->tokens[position].line_number, false);
+    INC_POS(pos);
 
-    var_decl_stmt -> initializer = create_expr_node(stream, position);
-    if(!var_decl_stmt -> initializer)
-        return error_handling(CREATE_VAR_DECL_STMT_func_INITIALIZER_PARSE_ERROR, stream->tokens[position].line_number, false);
+    if(*pos >= (int)stream->count || stream->tokens[*pos].type_token != assing_op_token)
+        return error_handling(CREATE_VAR_DECL_STMT_func_THIRD_TOKEN_NOT_ASSIGN_ERROR,
+                              stream->tokens[*pos - 1].line_number, 
+                               false);
+
+    INC_POS(pos);
+
+    var_decl_stmt->initializer = parse_expression(stream, pos);
+    if(!var_decl_stmt->initializer)
+        return error_handling(CREATE_VAR_DECL_STMT_func_INITIALIZER_PARSE_ERROR,
+                              stream->tokens[*pos - 1].line_number,
+                               false);
 
     return var_decl_stmt;
 }
 
-/*  */
-expr_node_t* create_expr_node(TOKEN_STREAM* stream, int position)
+assignment_stmt_t* create_assignment_stmt(TOKEN_STREAM* stream, int* pos)
 {
-    int token_count = 0;
-    
-    /* Validate expression and get token count */
-    if (!is_valid_expr(stream, position, &token_count))
-        return error_handling(CREATE_EXPR_NODE_func_INVALID_EXPRESSION, 
-                            stream->tokens[position].line_number, false);
-    
-    /* TODO: реализовать парсинг выражения используя token_count токенов */
-    parse_expression();
-    
-    expr_node_t* expr = pli_alloc(sizeof(expr_node_t));
-    if (!expr)
-        return error_handling(MEMORY_ALLOCATION_ERROR, 
-                            stream->tokens[position].line_number, false);
-    
-    return expr;
+    if(stream->tokens[*pos].type_token != iden_token)
+        return error_handling(CREATE_ASSIGNMENT_STMT_func_FIRST_TOKEN_NOT_IDEN_ERROR,
+                              stream->tokens[*pos].line_number,
+                               false);
+
+    int iden_pos = *pos;
+    INC_POS(pos);
+
+    if(*pos >= (int)stream->count || stream->tokens[*pos].type_token != assing_op_token)
+        return error_handling(CREATE_ASSIGNMENT_STMT_func_SECOND_TOKEN_NOT_ASSIGN_ERROR,
+                              stream->tokens[*pos - 1].line_number,
+                               false);
+
+    assignment_stmt_t* assignment_stmt = pli_alloc(sizeof(assignment_stmt_t));
+    if(!assignment_stmt)
+        return error_handling(MEMORY_ALLOCATION_ERROR,
+                              stream->tokens[*pos].line_number,
+                               false);
+
+    strncpy(assignment_stmt->var_name,
+            stream->tokens[iden_pos].text_token.text,
+            MAX_VAR_SIZE);
+
+    INC_POS(pos);
+
+    assignment_stmt -> value = parse_expression(stream, pos);
+    if(!assignment_stmt -> value)
+        return error_handling(CREATE_ASSIGNMENT_STMT_func_ASSIGNMENT_VALUE_PARSE_ERROR, 
+                              stream->tokens[*pos].line_number,
+                              false);
+
+    return assignment_stmt;
+}
+
+if_stmt_t* create_if_stmt(TOKEN_STREAM* stream, int* pos)
+{
+    if(stream->tokens[*pos].type_token != kw_token_if)
+        return error_handling(CREATE_IF_STMT_func_FIRST_TOKEN_NOT_IF_ERROR,
+                              stream->tokens[*pos].line_number,
+                               false);
+
+    INC_POS(pos);
+
+    if(*pos >= (int)stream->count || stream->tokens[*pos].type_token != sep_token_lparen)
+        return error_handling(CREATE_IF_STMT_func_SECOND_TOKEN_NOT_LPAREN_ERROR,
+                              stream->tokens[*pos - 1].line_number,
+                               false);
+
+    if_stmt_t* if_stmt = pli_alloc(sizeof(if_stmt_t));
+    if(!if_stmt)
+        return error_handling(MEMORY_ALLOCATION_ERROR,
+                            stream->tokens[*pos].line_number,
+                            false);
+    //if_stmt -> condition = parse_expression(TOKEN_STREAM *stream, int *pos)
+            
+    return if_stmt;
 }

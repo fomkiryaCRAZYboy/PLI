@@ -1,0 +1,4 @@
+var result = (a + b) * c - d / (e % 2)
+var check = x > 0 and x < 100
+var flag = not (a == b) or c != d
+var big = 1 + 2 + 3 + 4 + 5

@@ -43,6 +43,7 @@
         DECODE(GET_SEP_OP_TOKEN_func_INVALID_SEP_OP_ERROR,   "InvalidSepOpError") \
         \
         DECODE(PARSE_func_CRAETE_VAR_DECL_STMT_ERROR,        "VarDelarationStatementCreationError") \
+        DECODE(PARSE_func_CRAETE_ASSIGNMENT_STMT_ERROR,      "AssignmentStatementCreationError") \
         DECODE(PARSE_func_STMT_CREATION_ERROR,               "StatementCreationError") \
         \
         DECODE(CREATE_VAR_DECL_STMT_func_FIRST_TOKEN_NOT_VAR_ERROR,      "MissingVarKeyWordError") \
@@ -50,7 +51,18 @@
         DECODE(CREATE_VAR_DECL_STMT_func_THIRD_TOKEN_NOT_ASSIGN_ERROR,   "MissingAssignmentSignError") \
         DECODE(CREATE_VAR_DECL_STMT_func_INITIALIZER_PARSE_ERROR,        "InitializerParseError") \
         \
+        DECODE(CREATE_ASSIGNMENT_STMT_func_FIRST_TOKEN_NOT_IDEN_ERROR,       "MissingIdentifierError") \
+        DECODE(CREATE_ASSIGNMENT_STMT_func_SECOND_TOKEN_NOT_ASSIGN_ERROR,    "MissingAssignmentSignError") \
+        DECODE(CREATE_ASSIGNMENT_STMT_func_ASSIGNMENT_VALUE_PARSE_ERROR,     "AssignmentValueParseError") \
+        \
+        DECODE(CREATE_IF_STMT_func_FIRST_TOKEN_NOT_IF_ERROR,             "MissingIfKeywordError")\
+        DECODE(CREATE_IF_STMT_func_SECOND_TOKEN_NOT_LPAREN_ERROR,        "MissingOpeningParenthesisError") \
+        \
         DECODE(CREATE_EXPR_NODE_func_INVALID_EXPRESSION,                 "InvalidExpressionError") \
+        \
+        DECODE(PARSE_EXPR_UNEXPECTED_TOKEN,                              "UnexpectedTokenInExpression") \
+        DECODE(PARSE_EXPR_MISSING_RPAREN,                                "MissingClosingParenthesis") \
+        DECODE(PARSE_EXPR_MISSING_OPERAND,                               "MissingOperandAfterOperator") \
         \
         DECODE(CREATE_STMT_func_UNKNOWN_STMT_TYPE,                       "UnknownStatementType") \
         \

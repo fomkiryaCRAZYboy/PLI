@@ -1,0 +1,5 @@
+var neg = -42
+var dbl_neg = - -5
+var flip = not true
+var dbl_flip = not not false
+var expr = -3 + 10

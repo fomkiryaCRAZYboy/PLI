@@ -1,0 +1,5 @@
+var sum = 10 + 20
+var diff = 100 - 37
+var prod = 6 * 7
+var quot = 84 / 4
+var rem = 17 % 5
