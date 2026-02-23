@@ -42,9 +42,13 @@
         DECODE(GET_SEP_OP_TOKEN_func_ALLOC_ERROR,            "SepOpTokenAllocError") \
         DECODE(GET_SEP_OP_TOKEN_func_INVALID_SEP_OP_ERROR,   "InvalidSepOpError") \
         \
-        DECODE(PARSE_func_CRAETE_VAR_DECL_STMT_ERROR,        "VarDelarationStatementCreationError") \
-        DECODE(PARSE_func_CRAETE_ASSIGNMENT_STMT_ERROR,      "AssignmentStatementCreationError") \
+        DECODE(PARSE_func_CREATE_VAR_DECL_STMT_ERROR,        "VarDelarationStatementCreationError") \
+        DECODE(PARSE_func_CREATE_ASSIGNMENT_STMT_ERROR,      "AssignmentStatementCreationError") \
+        DECODE(PARSE_func_CREATE_IF_STMT_ERROR,              "IfStatementCreationError") \
+        DECODE(PARSE_func_CREATE_WHILE_STMT_ERROR,           "WhileStatementCreationError") \
         DECODE(PARSE_func_STMT_CREATION_ERROR,               "StatementCreationError") \
+        \
+        DECODE(PARSE_BLOCK_func_MISSING_RBRACE,              "MissingClosingCurlyBrace") \
         \
         DECODE(CREATE_VAR_DECL_STMT_func_FIRST_TOKEN_NOT_VAR_ERROR,      "MissingVarKeyWordError") \
         DECODE(CREATE_VAR_DECL_STMT_func_SECOND_TOKEN_NOT_IDEN_ERROR,    "MissingIdentifierError") \
@@ -56,7 +60,16 @@
         DECODE(CREATE_ASSIGNMENT_STMT_func_ASSIGNMENT_VALUE_PARSE_ERROR,     "AssignmentValueParseError") \
         \
         DECODE(CREATE_IF_STMT_func_FIRST_TOKEN_NOT_IF_ERROR,             "MissingIfKeywordError")\
-        DECODE(CREATE_IF_STMT_func_SECOND_TOKEN_NOT_LPAREN_ERROR,        "MissingOpeningParenthesisError") \
+        DECODE(CREATE_any_STMT_func_SECOND_TOKEN_NOT_LPAREN_ERROR,       "MissingOpeningParenthesisError") \
+        DECODE(CREATE_IF_STMT_func_CONDITION_PARSE_ERROR,                "IfConditionParseError") \
+        DECODE(CREATE_any_STMT_func_MISSING_RPAREN,                       "MissingClosingParenthesisError") \
+        DECODE(CREATE_any_STMT_func_MISSING_LBRACE,                       "MissingOpeningCurlyBraceError") \
+        DECODE(CREATE_IF_STMT_func_THEN_BRANCH_PARSE_ERROR,              "ThenBraceParseError") \
+        DECODE(CREATE_IF_STMT_func_ELSE_BRANCH_PARSE_ERROR,              "ElseBraceParseError") \
+        \
+        DECODE(CREATE_WHILE_STMT_func_FIRST_TOKEN_NOT_WHILE_ERROR,       "MissingWhileKeywordError") \
+        DECODE(CREATE_WHILE_STMT_func_CONDITION_PARSE_ERROR,             "WhileConditionParseError") \
+        DECODE(CRCREATE_WHILE_STMT_func_BODY_PARSE_ERROR,                "WhileBodyParseError") \
         \
         DECODE(CREATE_EXPR_NODE_func_INVALID_EXPRESSION,                 "InvalidExpressionError") \
         \

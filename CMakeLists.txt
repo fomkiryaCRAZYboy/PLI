@@ -74,14 +74,31 @@ set(TIDY_CHECKS
     
 string(REPLACE ";" "," TIDY_CHECKS_STR "${TIDY_CHECKS}")
 
-file(GLOB SOURCES LIST_DIRECTORIES false src/*.c)
+# output directories
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
+# collect source files into 'SOURCES'
+file(GLOB SOURCES LIST_DIRECTORIES false src/*.c)
+list(FILTER SOURCES EXCLUDE REGEX ".*/mem\\.c$")
+
+# add memory control library
+add_library(memctl SHARED src/memctl/mem.c)
+set_target_properties(memctl PROPERTIES OUTPUT_NAME memctl PREFIX "")
+target_include_directories(memctl PRIVATE include)
+
+# add executable target - pli
 add_executable(pli ${SOURCES})
+
+target_link_libraries(pli PRIVATE memctl)
 target_include_directories(pli PRIVATE include)
 
 add_custom_target(fullclean
     COMMAND ${CMAKE_COMMAND} -E echo "Removing build configuration..."
     COMMAND ${CMAKE_COMMAND} -E remove -f ${CMAKE_SOURCE_DIR}/build/*
+    COMMAND ${CMAKE_COMMAND} -E remove -f ${CMAKE_SOURCE_DIR}/build/lib/*
+    COMMAND ${CMAKE_COMMAND} -E remove -f ${CMAKE_SOURCE_DIR}/build/bin/*
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_SOURCE_DIR}/build/CMakeFiles
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_SOURCE_DIR}/build/preprocessed
 )

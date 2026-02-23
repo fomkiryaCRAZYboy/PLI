@@ -164,7 +164,7 @@ typedef struct {
 
 /* Block statement */
 typedef struct {
-    stmt_node_t** statements;  /* Array of statements in block */
+    stmt_node_t* statements;  /* Array of statements in block */
     int stmt_count;            /* Number of statements */
 } block_stmt_t;
 
@@ -194,8 +194,5 @@ typedef struct {
     int stmt_count;            /* Number of statements */
 } program_t;
 
-
-/* DEBUG */
-void print_ast(program_t* program);
 
 #endif /* PARSER_H */

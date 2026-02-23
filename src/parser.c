@@ -7,62 +7,58 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#if 0
-kw_token_var  ,     /* 'var'   - variable declare keyword */
-    kw_token_if   ,     /* 'if'    - conditional statement */
-    kw_token_else ,     /* 'else'  - alternative branch */
-    kw_token_while,     /* 'while' - loop statement */
-    kw_token_print,     /* 'print' - output function */
-    kw_token_read ,     /* 'read'  - input function */
-    kw_token_and  ,     /* 'and'   - logical operator */
-    kw_token_or   ,     /* 'or'    - logical operator */
-    kw_token_not  ,     /* 'not'   - logical operator */
+stmt_node_t* parse_statement(TOKEN_STREAM* stream, int* pos)
+{
+    int stmt_line = stream->tokens[*pos].line_number;
 
-    /* --- IDENTIFIERS --- */
-    iden_token,          /* identifier - variable, e.g.: 'x', 'count', 'my_var' */
+    switch (stream->tokens[*pos].type_token)
+    {
+        case kw_token_var:
+        {
+            var_decl_stmt_t* vd = create_var_decl_stmt(stream, pos);
+            if (!vd) 
+                return error_handling(PARSE_func_CREATE_VAR_DECL_STMT_ERROR,
+                                      stmt_line,
+                                       false);
 
-    /* --- LITERALS --- */
-    str_token   ,        /* string literal, e.g. : '"hello"', '"world"' */
-    num_token   ,        /* number literal, e.g. : '42', '3.14', '10' */
-    bool_token_t,        /* boolean true, e.g.   : 'true' */
-    bool_token_f,        /* boolean false, e.g.  : 'false' */
-    
-    /* --- ARITHMETIC OPERATORS --- */
-    math_op_token_mult ,   /* multiplication, e.g.: '*' */
-    math_op_token_div  ,   /* division, e.g.      : '/' */
-    math_op_token_plus ,   /* addition, e.g.      : '+' */
-    math_op_token_minus,   /* subtraction, e.g.   : '-' */
-    math_op_token_percent,   /* remainder from division, e.g.   : '%' */
+            return create_stmt(vd, STMT_VAR_DECL, stmt_line);
+        }
+        case iden_token:
+        {
+            assignment_stmt_t* as = create_assignment_stmt(stream, pos);
+            if (!as) 
+                return error_handling(PARSE_func_CREATE_ASSIGNMENT_STMT_ERROR,
+                                      stmt_line,
+                                       false);
 
+            return create_stmt(as, STMT_ASSIGNMENT, stmt_line);
+        }
+        case kw_token_if:
+        {
+            if_stmt_t* ifs = create_if_stmt(stream, pos);
+            if (!ifs) 
+                return error_handling(PARSE_func_CREATE_IF_STMT_ERROR,
+                                      stmt_line,
+                                       false);
 
-    /* --- ASSIGNMENT OPERATOR --- */
-    assing_op_token,     /* assignment, e.g.      : '=' */
+            return create_stmt(ifs, STMT_IF, stmt_line);
+        }
+        case kw_token_while:
+        {
+            while_stmt_t* whs = create_while_stmt(stream, pos);
+            if(!whs)
+                return error_handling(PARSE_func_CREATE_WHILE_STMT_ERROR, 
+                                      stmt_line,
+                                      false);
 
-    /* --- COMPARISON OPERATORS --- */
-    comp_op_token_equal     ,       /* equality, e.g.         : '==' */
-    comp_op_token_not_equal ,       /* inequality, e.g.       : '!=' */
-    comp_op_token_more      ,       /* greater than, e.g.     : '>' */
-    comp_op_token_less      ,       /* less than, e.g.        : '<' */
-    comp_op_token_less_equal,       /* less or equal, e.g.    : '<=' */
-    comp_op_token_more_equal,       /* greater or equal, e.g. : '>=' */
+            return create_stmt(whs, STMT_WHILE, stmt_line);
+        }
 
-    /* --- SEPARATORS --- */
-    sep_token_lparen   ,       /* left parenthesis, e.g.  : '(' */
-    sep_token_rparen   ,       /* right parenthesis, e.g. : ')' */
-    sep_token_lbrace   ,       /* left brace, e.g.        : '{' */
-    sep_token_rbrace   ,       /* right brace, e.g.       : '}' */
-#if 0
-    /* no implementation yet */
-
-    sep_token_lbracket ,       /* left bracket, e.g.      : '[' */
-    sep_token_rbracket ,       /* right bracket, e.g.     : ']' */
-#endif    
-    sep_token_comma    ,       /* comma, e.g.             : ',' */
-    sep_token_dot      ,       /* dot, e.g.               : '.' */
-
-
-    unknown_token              /* unknown/error token */
-#endif
+        /* print, read */
+        default:
+            return NULL;
+    }
+}
 
 /* add new stmt to stmts_list */
 static void add_stmt_to_list(stmt_node_t* stmt, program_t* program)
@@ -84,7 +80,7 @@ static void add_stmt_to_list(stmt_node_t* stmt, program_t* program)
 }
 
 /*  */
-static stmt_node_t* create_stmt(void* any_stmt, stmt_type_t type, int line_num)
+stmt_node_t* create_stmt(void* any_stmt, stmt_type_t type, int line_num)
 {
     stmt_node_t* stmt = pli_alloc(sizeof(stmt_node_t));
     if(!stmt)
@@ -145,69 +141,20 @@ program_t* parse(TOKEN_STREAM* stream)
     program -> stmt_count = 0;
     program -> statements = NULL;
 
-    int pos = 0;
+    stmt_node_t* stmt = NULL;
+    int pos = 0, line = 0;
     while(pos < (int)stream->count)
     {
-        switch (stream->tokens[pos].type_token)
-        {
-            case kw_token_var:
-            {
-                int stmt_line = stream->tokens[pos].line_number;
-                var_decl_stmt_t* var_decl_stmt = create_var_decl_stmt(stream, &pos);
-                if(!var_decl_stmt)
-                {
-                    add_err_code(PARSE_func_CRAETE_VAR_DECL_STMT_ERROR,
-                                   stmt_line,
-                                    false);
-                    return NULL;
-                }
+        stmt = parse_statement(stream, &pos);
+        line = stream->tokens[pos].line_number; 
 
-                stmt_node_t* stmt = create_stmt(var_decl_stmt, STMT_VAR_DECL, stmt_line);
-                if(!stmt)
-                {
-                    add_err_code(PARSE_func_STMT_CREATION_ERROR,
-                                   stmt_line,
-                                    false);
-                    return NULL;
-                }
-
-                add_stmt_to_list(stmt, program);
-                break;
-            }
-
-            case iden_token:
-            {
-                int stmt_line = stream->tokens[pos].line_number;
-                assignment_stmt_t* assignment_stmt = create_assignment_stmt(stream, &pos);
-                if(!assignment_stmt)
-                {
-                    add_err_code(PARSE_func_CRAETE_ASSIGNMENT_STMT_ERROR,
-                        stmt_line,
-                        false);
-                    return NULL;
-                }
-
-                stmt_node_t* stmt = create_stmt(assignment_stmt, STMT_ASSIGNMENT, stmt_line);
-                if(!stmt)
-                {
-                    add_err_code(PARSE_func_STMT_CREATION_ERROR,
-                                   stmt_line,
-                                    false);
-                    return NULL;
-                }
-
-                add_stmt_to_list(stmt, program);
-                break;
-            }
-
-            case kw_token_if:
-            {
-
-            }
-            default: 
-                return NULL;
-        }
-    }
+        if(!stmt)
+            return error_handling(PARSE_func_STMT_CREATION_ERROR,
+                                  line,
+                                   false);
+        else
+            add_stmt_to_list(stmt, program);
+    }    
 
     return program;
 }

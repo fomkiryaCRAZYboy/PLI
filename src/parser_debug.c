@@ -155,13 +155,18 @@ static void print_stmt(stmt_node_t* stmt, int depth)
             break;
 
         case STMT_BLOCK:
+        {
             print_indent(depth);
             printf("{\n");
-            for(int i = 0; i < stmt->as.block->stmt_count; ++i)
-                print_stmt(stmt->as.block->statements[i], depth + 1);
+            stmt_node_t* curr = stmt->as.block->statements;
+            while(curr) {
+                print_stmt(curr, depth + 1);
+                curr = curr->next;
+            }
             print_indent(depth);
             printf("}\n");
             break;
+        }
     }
 }
 

@@ -50,9 +50,10 @@ int main() {
     fclose(input_f);
     program[total_read] = '\0';
 #else  /* interactive input */
-    printf("Enter your PLI program (empty line to finish):\n> ");
+    printf("Enter your PLI program (empty line to finish):\n1 > ");
     
     size_t total_read = 0;
+    int lnum = 2;
     char buffer[1024];
     
     while(fgets(buffer, sizeof(buffer), stdin) != NULL && total_read < MAX_TOKENS_COUNT_IN_BLOCK - 1)
@@ -81,7 +82,7 @@ int main() {
         if(total_read >= MAX_TOKENS_COUNT_IN_BLOCK - 1)
             break;
 
-        printf("> ");
+        printf("%d > ", lnum++);
     }
     
     program[total_read] = '\0';
@@ -94,7 +95,7 @@ int main() {
         exit(EXIT_FAILURE);
     }
 
-    debug_print_stream(stream);
+    //debug_print_stream(stream);
 
     program_t* ast = parse(stream);
 
