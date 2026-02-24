@@ -53,8 +53,27 @@ stmt_node_t* parse_statement(TOKEN_STREAM* stream, int* pos)
 
             return create_stmt(whs, STMT_WHILE, stmt_line);
         }
+        case kw_token_print:
+        {
+            print_stmt_t* prs = create_print_stmt(stream, pos);
+            if(!prs)
+                return error_handling(PARSE_func_CREATE_PRINT_STMT_ERROR, 
+                    stmt_line,
+                    false);
 
-        /* print, read */
+            return create_stmt(prs, STMT_PRINT, stmt_line);
+        }
+
+        case kw_token_read:
+        {
+            read_stmt_t* rs = create_read_stmt(stream, pos);
+            if(!rs)
+                return error_handling(PARSE_func_CREATE_READ_STMT_ERROR,
+                                      stmt_line, false);
+
+            return create_stmt(rs, STMT_READ, stmt_line);
+        }
+
         default:
             return NULL;
     }

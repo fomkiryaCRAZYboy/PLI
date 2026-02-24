@@ -46,6 +46,8 @@
         DECODE(PARSE_func_CREATE_ASSIGNMENT_STMT_ERROR,      "AssignmentStatementCreationError") \
         DECODE(PARSE_func_CREATE_IF_STMT_ERROR,              "IfStatementCreationError") \
         DECODE(PARSE_func_CREATE_WHILE_STMT_ERROR,           "WhileStatementCreationError") \
+        DECODE(PARSE_func_CREATE_PRINT_STMT_ERROR,           "PrintStatementCreationError") \
+        DECODE(PARSE_func_CREATE_READ_STMT_ERROR,            "ReadStatementCreationError") \
         DECODE(PARSE_func_STMT_CREATION_ERROR,               "StatementCreationError") \
         \
         DECODE(PARSE_BLOCK_func_MISSING_RBRACE,              "MissingClosingCurlyBrace") \
@@ -69,7 +71,14 @@
         \
         DECODE(CREATE_WHILE_STMT_func_FIRST_TOKEN_NOT_WHILE_ERROR,       "MissingWhileKeywordError") \
         DECODE(CREATE_WHILE_STMT_func_CONDITION_PARSE_ERROR,             "WhileConditionParseError") \
-        DECODE(CRCREATE_WHILE_STMT_func_BODY_PARSE_ERROR,                "WhileBodyParseError") \
+        DECODE(CREATE_WHILE_STMT_func_BODY_PARSE_ERROR,                  "WhileBodyParseError") \
+        \
+        DECODE(CREATE_PRINT_STMT_func_FIRST_TOKEN_NOT_PRINT_ERROR,       "MissingPrintKeywordError") \
+        DECODE(CREATE_PRINT_STMT_func_INVALID_ARG_ERROR,                 "InvalidPrintArgumentError") \
+        DECODE(CREATE_PRINT_STMT_func_TO_MANY_ARG_ERROR,                 "ToManyPrintArgumentsError") \
+        \
+        DECODE(CREATE_READ_STMT_func_FIRST_TOKEN_NOT_READ_ERROR,         "MissingReadKeywordError") \
+        DECODE(CREATE_READ_STMT_func_EXPECTED_IDENTIFIER_ERROR,          "ReadExpectedIdentifierError") \
         \
         DECODE(CREATE_EXPR_NODE_func_INVALID_EXPRESSION,                 "InvalidExpressionError") \
         \
@@ -80,7 +89,6 @@
         DECODE(CREATE_STMT_func_UNKNOWN_STMT_TYPE,                       "UnknownStatementType") \
         \
         DECODE(PARSING_func_MISSING_LPAREN_PRINT_ST_ERROR,   "MissingOpeningParenthesisError") \
-        DECODE(PARSING_func_INVALID_ARG_PRINT_ST_ERROR,      "InvalidPrintArgumentError") \
         \
         DECODE(PRINT_ADD_ARG_func_VARIABLE_NOT_EXIST_ERROR,  "VariableDoesNotExist") \
 

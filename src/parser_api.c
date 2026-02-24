@@ -269,7 +269,7 @@ while_stmt_t* create_while_stmt(TOKEN_STREAM* stream, int* pos)
     /* recurse parse subprogram in braces {} */
     block_stmt_t* body = parse_block(stream, pos);
     if(!body)
-        return error_handling(CRCREATE_WHILE_STMT_func_BODY_PARSE_ERROR, 
+        return error_handling(CREATE_WHILE_STMT_func_BODY_PARSE_ERROR, 
                               stream->tokens[*pos].line_number,
                                false);
 
@@ -285,4 +285,109 @@ while_stmt_t* create_while_stmt(TOKEN_STREAM* stream, int* pos)
     INC_POS(pos);
 
     return while_stmt;
+}
+
+print_stmt_t* create_print_stmt(TOKEN_STREAM* stream, int* pos)
+{
+    if(stream->tokens[*pos].type_token != kw_token_print)
+        return error_handling(CREATE_PRINT_STMT_func_FIRST_TOKEN_NOT_PRINT_ERROR,
+                              stream->tokens[*pos].line_number,
+                               false);
+
+    INC_POS(pos);
+
+    if(*pos >= (int)stream->count || stream->tokens[*pos].type_token != sep_token_lparen)
+        return error_handling(CREATE_any_STMT_func_SECOND_TOKEN_NOT_LPAREN_ERROR,
+                              stream->tokens[*pos - 1].line_number,
+                               false);
+    
+    INC_POS(pos);
+
+    print_stmt_t* print_stmt = pli_alloc(sizeof(print_stmt_t));
+    if(!print_stmt)
+        return error_handling(MEMORY_ALLOCATION_ERROR,
+                            stream->tokens[*pos].line_number,
+                            false);
+
+    print_stmt -> expressions = pli_alloc(sizeof(expr_node_t*) * MAX_PRINT_ARGS);
+    if(!print_stmt -> expressions)
+        return error_handling(MEMORY_ALLOCATION_ERROR,
+                            stream->tokens[*pos].line_number,
+                            false);
+
+    print_stmt->expr_count = 0;
+
+    /* first expression is required */
+    print_stmt->expressions[0] = parse_expression(stream, pos);
+    if(!print_stmt->expressions[0])
+        return error_handling(CREATE_PRINT_STMT_func_INVALID_ARG_ERROR,
+                            stream->tokens[*pos - 1].line_number, false);
+    print_stmt->expr_count = 1;
+
+    /* additional expressions separated by ',' */
+    while(*pos < (int)stream->count
+          && stream->tokens[*pos].type_token == sep_token_comma)
+    {
+        INC_POS(pos);
+
+        if(print_stmt->expr_count >= MAX_PRINT_ARGS)
+            return error_handling(CREATE_PRINT_STMT_func_TO_MANY_ARG_ERROR,
+                                stream->tokens[*pos - 1].line_number, false);
+
+        print_stmt->expressions[print_stmt->expr_count] = parse_expression(stream, pos);
+        if(!print_stmt->expressions[print_stmt->expr_count])
+            return error_handling(CREATE_PRINT_STMT_func_INVALID_ARG_ERROR,
+                                stream->tokens[*pos - 1].line_number, false);
+
+        print_stmt->expr_count++;
+    }
+
+    /* expect ')' */
+    if(*pos >= (int)stream->count || stream->tokens[*pos].type_token != sep_token_rparen)
+        return error_handling(CREATE_any_STMT_func_MISSING_RPAREN,
+                            stream->tokens[*pos - 1].line_number, false);
+
+    INC_POS(pos);
+
+    return print_stmt;
+}
+
+read_stmt_t* create_read_stmt(TOKEN_STREAM* stream, int* pos)
+{
+    /* read */
+    if(stream->tokens[*pos].type_token != kw_token_read)
+        return error_handling(CREATE_READ_STMT_func_FIRST_TOKEN_NOT_READ_ERROR,
+                              stream->tokens[*pos].line_number, false);
+
+    INC_POS(pos);
+
+    /* ( */
+    if(*pos >= (int)stream->count || stream->tokens[*pos].type_token != sep_token_lparen)
+        return error_handling(CREATE_any_STMT_func_SECOND_TOKEN_NOT_LPAREN_ERROR,
+                              stream->tokens[*pos - 1].line_number, false);
+
+    INC_POS(pos);
+
+    /* identifier */
+    if(*pos >= (int)stream->count || stream->tokens[*pos].type_token != iden_token)
+        return error_handling(CREATE_READ_STMT_func_EXPECTED_IDENTIFIER_ERROR,
+                              stream->tokens[*pos - 1].line_number, false);
+
+    read_stmt_t* read_stmt = pli_alloc(sizeof(read_stmt_t));
+    if(!read_stmt)
+        return error_handling(MEMORY_ALLOCATION_ERROR,
+                              stream->tokens[*pos].line_number, false);
+
+    strncpy(read_stmt->var_name, stream->tokens[*pos].text_token.text, MAX_VAR_SIZE);
+
+    INC_POS(pos);
+
+    /* ) */
+    if(*pos >= (int)stream->count || stream->tokens[*pos].type_token != sep_token_rparen)
+        return error_handling(CREATE_any_STMT_func_MISSING_RPAREN,
+                              stream->tokens[*pos - 1].line_number, false);
+
+    INC_POS(pos);
+
+    return read_stmt;
 }

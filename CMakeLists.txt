@@ -56,14 +56,7 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
-option(FILE_INPUT "Enable file input mode" OFF)
-
-if(FILE_INPUT)
-    add_compile_definitions(FILE_INPUT)
-    message(STATUS "File input mode: ENABLED")
-else()
-    message(STATUS "File input mode: DISABLED")
-endif()
+# FILE_INPUT removed: pli now accepts file path as argv[1]
 
 set(TIDY_CHECKS
     "performance-*"
@@ -120,7 +113,6 @@ foreach(SOURCE_FILE ${SOURCES})
     get_filename_component(FILE_NAME ${SOURCE_FILE} NAME_WE)
     add_custom_command(TARGET preprocess POST_BUILD
         COMMAND ${CMAKE_C_COMPILER} -E -I${CMAKE_SOURCE_DIR}/include 
-                $<$<BOOL:${FILE_INPUT}>:-DFILE_INPUT>
                 ${SOURCE_FILE} -o ${CMAKE_BINARY_DIR}/preprocessed/${FILE_NAME}_preprocessed.c
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         COMMENT "Preprocessing ${FILE_NAME}.c..."

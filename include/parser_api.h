@@ -10,6 +10,8 @@ var_decl_stmt_t* create_var_decl_stmt(TOKEN_STREAM* stream, int* pos);
 assignment_stmt_t* create_assignment_stmt(TOKEN_STREAM* stream, int* pos);
 if_stmt_t* create_if_stmt(TOKEN_STREAM* stream, int* pos);
 while_stmt_t* create_while_stmt(TOKEN_STREAM* stream, int* pos);
+print_stmt_t* create_print_stmt(TOKEN_STREAM* stream, int* pos);
+read_stmt_t* create_read_stmt(TOKEN_STREAM* stream, int* pos);
 expr_node_t* parse_expression(TOKEN_STREAM* stream, int* pos);
 stmt_node_t* parse_statement(TOKEN_STREAM* stream, int* pos);
 
