@@ -8,6 +8,12 @@
 #define MAX_STR_SIZE    MAX_TOKEN_TEXT_SIZE
 #define MAX_VAR_SIZE    MAX_TOKEN_TEXT_SIZE
 
+/* lokup varname in hash table */
+bool var_hash_lookup(const char* varname);
+int var_hash_function(const char* varname);
+void var_hash_init();
+
+
 /* ============================================================================
  * RUNTIME VALUE TYPES (for interpreter/evaluator)
  * ============================================================================ */

@@ -13,7 +13,7 @@
  * AST node creation helpers
  * ============================================================================ */
 
-static expr_node_t* create_binary_expr(binary_op_t op, expr_node_t* left, expr_node_t* right)
+static expr_node_t* create_binary_expr(binary_op_t op, expr_node_t* left, expr_node_t* right, int line)
 {
     binary_expr_t* binary = pli_alloc(sizeof(binary_expr_t));
     if(!binary)
@@ -28,11 +28,12 @@ static expr_node_t* create_binary_expr(binary_op_t op, expr_node_t* left, expr_n
         return error_handling(MEMORY_ALLOCATION_ERROR, -1, false);
 
     node->type        = EXPR_BINARY;
+    node->line        = line;
     node->expr.binary = binary;
     return node;
 }
 
-static expr_node_t* create_unary_expr(unary_op_t op, expr_node_t* operand)
+static expr_node_t* create_unary_expr(unary_op_t op, expr_node_t* operand, int line)
 {
     unary_expr_t* unary = pli_alloc(sizeof(unary_expr_t));
     if(!unary)
@@ -46,11 +47,12 @@ static expr_node_t* create_unary_expr(unary_op_t op, expr_node_t* operand)
         return error_handling(MEMORY_ALLOCATION_ERROR, -1, false);
 
     node->type       = EXPR_UNARY;
+    node->line       = line;
     node->expr.unary = unary;
     return node;
 }
 
-static expr_node_t* create_literal_number(double value)
+static expr_node_t* create_literal_number(double value, int line)
 {
     literal_expr_t* lit = pli_alloc(sizeof(literal_expr_t));
     if(!lit)
@@ -64,11 +66,12 @@ static expr_node_t* create_literal_number(double value)
         return error_handling(MEMORY_ALLOCATION_ERROR, -1, false);
 
     node->type         = EXPR_LITERAL;
+    node->line         = line;
     node->expr.literal = lit;
     return node;
 }
 
-static expr_node_t* create_literal_string(const char* str)
+static expr_node_t* create_literal_string(const char* str, int line)
 {
     literal_expr_t* lit = pli_alloc(sizeof(literal_expr_t));
     if(!lit)
@@ -82,11 +85,12 @@ static expr_node_t* create_literal_string(const char* str)
         return error_handling(MEMORY_ALLOCATION_ERROR, -1, false);
 
     node->type         = EXPR_LITERAL;
+    node->line         = line;
     node->expr.literal = lit;
     return node;
 }
 
-static expr_node_t* create_literal_bool(bool value)
+static expr_node_t* create_literal_bool(bool value, int line)
 {
     literal_expr_t* lit = pli_alloc(sizeof(literal_expr_t));
     if(!lit)
@@ -100,11 +104,12 @@ static expr_node_t* create_literal_bool(bool value)
         return error_handling(MEMORY_ALLOCATION_ERROR, -1, false);
 
     node->type         = EXPR_LITERAL;
+    node->line         = line;
     node->expr.literal = lit;
     return node;
 }
 
-static expr_node_t* create_variable_expr(const char* name)
+static expr_node_t* create_variable_expr(const char* name, int line)
 {
     variable_expr_t* var = pli_alloc(sizeof(variable_expr_t));
     if(!var)
@@ -117,11 +122,12 @@ static expr_node_t* create_variable_expr(const char* name)
         return error_handling(MEMORY_ALLOCATION_ERROR, -1, false);
 
     node->type          = EXPR_VARIABLE;
+    node->line          = line;
     node->expr.variable = var;
     return node;
 }
 
-static expr_node_t* create_grouping_expr(expr_node_t* inner)
+static expr_node_t* create_grouping_expr(expr_node_t* inner, int line)
 {
     grouping_expr_t* group = pli_alloc(sizeof(grouping_expr_t));
     if(!group)
@@ -134,6 +140,7 @@ static expr_node_t* create_grouping_expr(expr_node_t* inner)
         return error_handling(MEMORY_ALLOCATION_ERROR, -1, false);
 
     node->type          = EXPR_GROUPING;
+    node->line          = line;
     node->expr.grouping = group;
     return node;
 }
@@ -152,8 +159,12 @@ static inline TOKEN_TYPE peek(TOKEN_STREAM* stream, int pos)
     return stream->tokens[pos].type_token;
 }
 
-static inline int current_line(TOKEN_STREAM* stream, int pos)
+static inline int safe_line(TOKEN_STREAM* stream, int pos)
 {
+    if(!stream || stream->count == 0)
+        return 0;
+    if(pos < 0)
+        return stream->tokens[0].line_number;
     if(pos < (int)stream->count)
         return stream->tokens[pos].line_number;
     return stream->tokens[stream->count - 1].line_number;
@@ -176,7 +187,7 @@ static expr_node_t* parse_primary(TOKEN_STREAM* stream, int* pos);
 static expr_node_t* parse_primary(TOKEN_STREAM* stream, int* pos)
 {
     if(at_end(stream, *pos))
-        return error_handling(PARSE_EXPR_UNEXPECTED_TOKEN, current_line(stream, *pos), false);
+        return error_handling(PARSE_EXPR_UNEXPECTED_TOKEN, safe_line(stream, *pos), false);
 
     TOKEN* token = &stream->tokens[*pos];
 
@@ -185,42 +196,52 @@ static expr_node_t* parse_primary(TOKEN_STREAM* stream, int* pos)
         case num_token:
         {
             double val = atof(token->text_token.num_text);
+            int line = token->line_number;
             ++(*pos);
-            return create_literal_number(val);
+            return create_literal_number(val, line);
         }
 
         case str_token:
         {
+            int line = token->line_number;
             ++(*pos);
-            return create_literal_string(token->text_token.text);
+            return create_literal_string(token->text_token.text, line);
         }
 
         case bool_token_t:
+        {
+            int line = token->line_number;
             ++(*pos);
-            return create_literal_bool(true);
+            return create_literal_bool(true, line);
+        }
 
         case bool_token_f:
+        {
+            int line = token->line_number;
             ++(*pos);
-            return create_literal_bool(false);
+            return create_literal_bool(false, line);
+        }
 
         case iden_token:
         {
+            int line = token->line_number;
             ++(*pos);
-            return create_variable_expr(token->text_token.text);
+            return create_variable_expr(token->text_token.text, line);
         }
 
         case sep_token_lparen:
         {
+            int line = token->line_number;
             ++(*pos);
             expr_node_t* inner = parse_expression(stream, pos);
             if(!inner)
                 return NULL;
 
             if(at_end(stream, *pos) || peek(stream, *pos) != sep_token_rparen)
-                return error_handling(PARSE_EXPR_MISSING_RPAREN, current_line(stream, *pos), false);
+                return error_handling(PARSE_EXPR_MISSING_RPAREN, safe_line(stream, *pos), false);
 
             ++(*pos);
-            return create_grouping_expr(inner);
+            return create_grouping_expr(inner, line);
         }
 
         default:
@@ -240,20 +261,22 @@ static expr_node_t* parse_unary(TOKEN_STREAM* stream, int* pos)
 
         if(t == math_op_token_minus)
         {
+            int line = safe_line(stream, *pos);
             ++(*pos);
             expr_node_t* operand = parse_unary(stream, pos);
             if(!operand)
                 return NULL;
-            return create_unary_expr(OP_NEGATE, operand);
+            return create_unary_expr(OP_NEGATE, operand, line);
         }
 
         if(t == kw_token_not)
         {
+            int line = safe_line(stream, *pos);
             ++(*pos);
             expr_node_t* operand = parse_unary(stream, pos);
             if(!operand)
                 return NULL;
-            return create_unary_expr(OP_NOT, operand);
+            return create_unary_expr(OP_NOT, operand, line);
         }
     }
 
@@ -279,12 +302,13 @@ static expr_node_t* parse_factor(TOKEN_STREAM* stream, int* pos)
         else if(t == math_op_token_percent) op = OP_MODULO;
         else break;
 
+        int line = safe_line(stream, *pos);
         ++(*pos);
         expr_node_t* right = parse_unary(stream, pos);
         if(!right)
             return NULL;
 
-        left = create_binary_expr(op, left, right);
+        left = create_binary_expr(op, left, right, line);
         if(!left) return NULL;
     }
 
@@ -309,12 +333,13 @@ static expr_node_t* parse_term(TOKEN_STREAM* stream, int* pos)
         else if(t == math_op_token_minus) op = OP_SUBTRACT;
         else break;
 
+        int line = safe_line(stream, *pos);
         ++(*pos);
         expr_node_t* right = parse_factor(stream, pos);
         if(!right)
             return NULL;
 
-        left = create_binary_expr(op, left, right);
+        left = create_binary_expr(op, left, right, line);
         if(!left) return NULL;
     }
 
@@ -343,12 +368,13 @@ static expr_node_t* parse_comparison(TOKEN_STREAM* stream, int* pos)
         else if(t == comp_op_token_more_equal) op = OP_GREATER_EQUAL;
         else break;
 
+        int line = safe_line(stream, *pos);
         ++(*pos);
         expr_node_t* right = parse_term(stream, pos);
         if(!right)
             return NULL;
 
-        left = create_binary_expr(op, left, right);
+        left = create_binary_expr(op, left, right, line);
         if(!left) return NULL;
     }
 
@@ -373,12 +399,13 @@ expr_node_t* parse_expression(TOKEN_STREAM* stream, int* pos)
         else if(t == kw_token_or)  op = OP_OR;
         else break;
 
+        int line = safe_line(stream, *pos);
         ++(*pos);
         expr_node_t* right = parse_comparison(stream, pos);
         if(!right)
             return NULL;
 
-        left = create_binary_expr(op, left, right);
+        left = create_binary_expr(op, left, right, line);
         if(!left) return NULL;
     }
 

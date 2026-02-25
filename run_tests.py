@@ -16,13 +16,20 @@ def run_file(path):
         text=True,
         timeout=10,
     )
-    if result.stdout:
-        print(result.stdout, end="")
-    if result.stderr:
-        print(result.stderr, end="")
+    stdout = result.stdout or ""
+    stderr = result.stderr or ""
+
+    if stdout:
+        print(stdout, end="")
+    if stderr:
+        print(stderr, end="")
     if result.returncode != 0:
         print(f"[EXIT CODE: {result.returncode}]")
     print()
+
+    combined_output = stdout + "\n" + stderr
+    has_runtime_errors = ">>> Error" in combined_output
+    return result.returncode == 0 and not has_runtime_errors
 
 def main():
     if not os.path.isfile(PLI_BIN):
@@ -56,8 +63,11 @@ def main():
 
     for f in files:
         try:
-            run_file(f)
-            passed += 1
+            ok = run_file(f)
+            if ok:
+                passed += 1
+            else:
+                failed += 1
         except subprocess.TimeoutExpired:
             print(f"--- {os.path.basename(f)} ---")
             print("[TIMEOUT]")

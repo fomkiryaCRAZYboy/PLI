@@ -12,7 +12,7 @@
                                              то необходимо сделать макс. длину имени переменной 
                                               и макс. длину для string 64 */
 
-#define MAX_TOKENS_COUNT_IN_BLOCK    1024
+#define MAX_TOKENS_COUNT_IN_BLOCK    5000
 
 
 /* token types for PLI lexer */

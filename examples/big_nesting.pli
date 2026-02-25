@@ -1,0 +1,15 @@
+var average = sum / students
+    print("Students: ", students)
+    print("Average: ", average)
+    print("Min grade: ", min_grade)
+    print("Max grade: ", max_grade)
+    print("Passed: ", pass_count, ", Failed: ", fail_count)
+
+    if (average >= 90) 
+    {
+        print("Group performance: excellent")
+    }
+    else
+    {
+        print("else")
+    }

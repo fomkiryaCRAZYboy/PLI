@@ -66,8 +66,8 @@
         DECODE(CREATE_IF_STMT_func_CONDITION_PARSE_ERROR,                "IfConditionParseError") \
         DECODE(CREATE_any_STMT_func_MISSING_RPAREN,                       "MissingClosingParenthesisError") \
         DECODE(CREATE_any_STMT_func_MISSING_LBRACE,                       "MissingOpeningCurlyBraceError") \
-        DECODE(CREATE_IF_STMT_func_THEN_BRANCH_PARSE_ERROR,              "ThenBraceParseError") \
-        DECODE(CREATE_IF_STMT_func_ELSE_BRANCH_PARSE_ERROR,              "ElseBraceParseError") \
+        DECODE(CREATE_IF_STMT_func_THEN_BRANCH_PARSE_ERROR,              "ThenBranchParseError") \
+        DECODE(CREATE_IF_STMT_func_ELSE_BRANCH_PARSE_ERROR,              "ElseBranchParseError") \
         \
         DECODE(CREATE_WHILE_STMT_func_FIRST_TOKEN_NOT_WHILE_ERROR,       "MissingWhileKeywordError") \
         DECODE(CREATE_WHILE_STMT_func_CONDITION_PARSE_ERROR,             "WhileConditionParseError") \
@@ -85,6 +85,12 @@
         DECODE(PARSE_EXPR_UNEXPECTED_TOKEN,                              "UnexpectedTokenInExpression") \
         DECODE(PARSE_EXPR_MISSING_RPAREN,                                "MissingClosingParenthesis") \
         DECODE(PARSE_EXPR_MISSING_OPERAND,                               "MissingOperandAfterOperator") \
+        \
+        DECODE(EXECUTE_func_UNDEFINED_STMT_TYPE,                         "UndefinedStatementType") \
+        \
+        DECODE(EXECUTE_VAR_DECL_func_VAR_DECL_STMT_IS_NULL,               "VarDeclarationStatementIsNull") \
+        DECODE(EXECUTE_VAR_DECL_func_INITIALIZER_IS_NULL,                 "InitializerIsNull") \
+        DECODE(EXECUTE_VAR_DECL_func_REDECLARATION_ERROR,                 "Re-DeclarationError") \
         \
         DECODE(CREATE_STMT_func_UNKNOWN_STMT_TYPE,                       "UnknownStatementType") \
         \

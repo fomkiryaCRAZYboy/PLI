@@ -1,0 +1,58 @@
+var students = 0
+var i = 0
+var grade = 0
+var sum = 0
+var min_grade = 100
+var max_grade = 0
+var pass_count = 0
+var fail_count = 0
+
+print("Enter number of students:")
+read(students)
+
+if (students <= 0) {
+    print("No students to process")
+} else {
+    while (i < students) {
+        print("Enter grade for student ", i)
+        read(grade)
+
+        if (grade < min_grade) {
+            min_grade = grade
+        }
+
+        if (grade > max_grade) {
+            max_grade = grade
+        }
+
+        if (grade >= 60) {
+            pass_count = pass_count + 1
+        } else {
+            fail_count = fail_count + 1
+        }
+
+        sum = sum + grade
+        i = i + 1
+    }
+
+    var average = sum / students
+    print("Students: ", students)
+    print("Average: ", average)
+    print("Min grade: ", min_grade)
+    print("Max grade: ", max_grade)
+    print("Passed: ", pass_count, ", Failed: ", fail_count)
+
+    if (average >= 90) {
+        print("Group performance: excellent")
+    } else {
+        if (average >= 75) {
+            print("Group performance: good")
+        } else {
+            if (average >= 60) {
+                print("Group performance: acceptable")
+            } else {
+                print("Group performance: weak")
+            }
+        }
+    }
+}

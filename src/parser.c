@@ -7,9 +7,20 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+static inline int safe_line(TOKEN_STREAM* stream, int pos)
+{
+    if(!stream || stream->count == 0)
+        return 0;
+    if(pos < 0)
+        return stream->tokens[0].line_number;
+    if(pos < (int)stream->count)
+        return stream->tokens[pos].line_number;
+    return stream->tokens[stream->count - 1].line_number;
+}
+
 stmt_node_t* parse_statement(TOKEN_STREAM* stream, int* pos)
 {
-    int stmt_line = stream->tokens[*pos].line_number;
+    int stmt_line = safe_line(stream, *pos);
 
     switch (stream->tokens[*pos].type_token)
     {
@@ -109,6 +120,7 @@ stmt_node_t* create_stmt(void* any_stmt, stmt_type_t type, int line_num)
     }
 
     stmt -> type = type;
+    stmt -> line = line_num;
 
     switch (type) 
     {
@@ -165,7 +177,7 @@ program_t* parse(TOKEN_STREAM* stream)
     while(pos < (int)stream->count)
     {
         stmt = parse_statement(stream, &pos);
-        line = stream->tokens[pos].line_number; 
+        line = safe_line(stream, pos);
 
         if(!stmt)
             return error_handling(PARSE_func_STMT_CREATION_ERROR,

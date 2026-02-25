@@ -7,47 +7,86 @@
 #include <string.h>
 #include <stdlib.h>
 
-static int read_from_file(const char* path, char* program)
+static int ensure_capacity(char** program, size_t* capacity, size_t required_size)
+{
+    if(required_size <= *capacity)
+        return 0;
+
+    size_t new_capacity = *capacity;
+    while(new_capacity < required_size)
+        new_capacity *= 2;
+
+    char* grown = pli_realloc(*program, new_capacity, *capacity);
+    if(!grown)
+        return -1;
+
+    *program = grown;
+    *capacity = new_capacity;
+    return 0;
+}
+
+static int append_text(char** program, size_t* used, size_t* capacity, const char* text, size_t text_len)
+{
+    if(ensure_capacity(program, capacity, *used + text_len + 1) != 0)
+        return -1;
+
+    memcpy(*program + *used, text, text_len);
+    *used += text_len;
+    (*program)[*used] = '\0';
+    return 0;
+}
+
+static char* read_from_file(const char* path)
 {
     FILE* f = fopen(path, "r");
     if(!f)
     {
         fprintf(stderr, "Error: Cannot open file %s\n", path);
-        return -1;
+        return NULL;
     }
 
-    size_t total_read = 0;
-    char buffer[MAX_TOKENS_COUNT_IN_BLOCK];
+    size_t capacity = 1024;
+    size_t used = 0;
+    char* program = pli_alloc(capacity);
+    if(!program)
+    {
+        fclose(f);
+        return NULL;
+    }
+    program[0] = '\0';
 
-    while(fgets(buffer, sizeof(buffer), f) != NULL && total_read < MAX_TOKENS_COUNT_IN_BLOCK - 1)
+    char buffer[1024];
+
+    while(fgets(buffer, sizeof(buffer), f) != NULL)
     {
         size_t line_length = strlen(buffer);
-        size_t available = MAX_TOKENS_COUNT_IN_BLOCK - total_read - 1;
-
-        if(line_length > available)
-            line_length = available;
-
-        memcpy(program + total_read, buffer, line_length);
-        total_read += line_length;
-
-        if(total_read >= MAX_TOKENS_COUNT_IN_BLOCK - 1)
-            break;
+        if(append_text(&program, &used, &capacity, buffer, line_length) != 0)
+        {
+            fclose(f);
+            pli_free(program);
+            return NULL;
+        }
     }
 
     fclose(f);
-    program[total_read] = '\0';
-    return 0;
+    return program;
 }
 
-static void read_interactive(char* program)
+static char* read_interactive(void)
 {
     printf("Enter your PLI program (empty line to finish):\n1 > ");
 
-    size_t total_read = 0;
+    size_t capacity = 1024;
+    size_t used = 0;
+    char* program = pli_alloc(capacity);
+    if(!program)
+        return NULL;
+    program[0] = '\0';
+
     int lnum = 2;
     char buffer[1024];
 
-    while(fgets(buffer, sizeof(buffer), stdin) != NULL && total_read < MAX_TOKENS_COUNT_IN_BLOCK - 1)
+    while(fgets(buffer, sizeof(buffer), stdin) != NULL)
     {
         int is_empty = 1;
         for(char* p = buffer; *p; p++)
@@ -59,25 +98,20 @@ static void read_interactive(char* program)
             }
         }
 
-        if(is_empty && total_read > 0)
+        if(is_empty && used > 0)
             break;
 
         size_t line_length = strlen(buffer);
-        size_t available = MAX_TOKENS_COUNT_IN_BLOCK - total_read - 1;
-
-        if(line_length > available)
-            line_length = available;
-
-        memcpy(program + total_read, buffer, line_length);
-        total_read += line_length;
-
-        if(total_read >= MAX_TOKENS_COUNT_IN_BLOCK - 1)
-            break;
+        if(append_text(&program, &used, &capacity, buffer, line_length) != 0)
+        {
+            pli_free(program);
+            return NULL;
+        }
 
         printf("%d > ", lnum++);
     }
 
-    program[total_read] = '\0';
+    return program;
 }
 
 int main(int argc, char* argv[])
@@ -85,25 +119,24 @@ int main(int argc, char* argv[])
     int ret = atexit_registration();
     if(ret != 0) exit(EXIT_FAILURE);
 
-    char program[MAX_TOKENS_COUNT_IN_BLOCK];
-    memset(program, 0, sizeof(program));
+    char* program = NULL;
 
     if(argc > 1)
     {
-        if(read_from_file(argv[1], program) != 0)
+        program = read_from_file(argv[1]);
+        if(!program)
             exit(EXIT_FAILURE);
     }
     else
     {
-        read_interactive(program);
+        program = read_interactive();
+        if(!program)
+            exit(EXIT_FAILURE);
     }
 
     TOKEN_STREAM* stream = tokenize(program);
     if(!stream)
-    {
-        add_err_code(MAIN_func_TOKENIZE_ERROR, 0, false);
         exit(EXIT_FAILURE);
-    }
 
     program_t* ast = parse(stream);
 
@@ -115,6 +148,9 @@ int main(int argc, char* argv[])
             pli_free(stream->tokens);
         pli_free(stream);
     }
+
+    if(program)
+        pli_free(program);
 
     exit(EXIT_SUCCESS);
 }

@@ -1,0 +1,73 @@
+var income = 0
+var expenses = 0
+var current_debt = 0
+var credit_score = 0
+var requested_amount = 0
+var term_months = 0
+var late_payments = 0
+
+print("Monthly income:")
+read(income)
+print("Monthly expenses:")
+read(expenses)
+print("Current debt:")
+read(current_debt)
+print("Credit score:")
+read(credit_score)
+print("Requested loan amount:")
+read(requested_amount)
+print("Term in months:")
+read(term_months)
+print("Late payments in last year:")
+read(late_payments)
+
+var disposable_income = income - expenses
+var debt_to_income = 0
+if (income > 0) {
+    debt_to_income = current_debt / income
+}
+
+var risk = 0
+if (credit_score >= 750 and late_payments == 0) {
+    risk = 1
+} else {
+    if (credit_score >= 650 and late_payments <= 2) {
+        risk = 2
+    } else {
+        risk = 3
+    }
+}
+
+var monthly_payment = 0
+if (term_months > 0) {
+    monthly_payment = requested_amount / term_months
+}
+
+print("Disposable income: ", disposable_income)
+print("Debt to income: ", debt_to_income)
+print("Estimated payment: ", monthly_payment)
+
+if (disposable_income <= 0 or term_months <= 0) {
+    print("Decision: reject")
+} else {
+    if (risk == 1 and debt_to_income < 0.4 and monthly_payment < disposable_income * 0.5) {
+        print("Decision: approve")
+    } else {
+        if (risk == 2 and debt_to_income < 0.5 and monthly_payment < disposable_income * 0.4) {
+            print("Decision: approve with review")
+        } else {
+            print("Decision: reject")
+        }
+    }
+}
+
+var month = 1
+var remaining = requested_amount
+while (month <= term_months and remaining > 0) {
+    remaining = remaining - monthly_payment
+    if (remaining < 0) {
+        remaining = 0
+    }
+    print("Month ", month, ", remaining debt: ", remaining)
+    month = month + 1
+}

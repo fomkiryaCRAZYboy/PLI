@@ -1,7 +1,6 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-#include "lexer.h"
 #include "var.h"
 
 #include <stdbool.h>
@@ -102,6 +101,7 @@ typedef struct {
 /* Main expression node (tagged union) */
 struct expr_node {
     expr_type_t type;
+    int line;  /* Source line where expression starts */
     union {
         binary_expr_t*   binary;
         unary_expr_t*    unary;
@@ -171,6 +171,7 @@ typedef struct {
 /* Main statement node (tagged union) */
 struct stmt_node {
     stmt_type_t type;
+    int line;  /* Source line where statement starts */
     union {
         var_decl_stmt_t* var_decl;
         assignment_stmt_t* assignment;
