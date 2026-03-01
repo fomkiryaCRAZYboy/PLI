@@ -16,6 +16,7 @@
         DECODE(MEMORY_ALLOCATION_ERROR,                      "MemoryAllocationError") \
         \
         DECODE(MAIN_func_TOKENIZE_ERROR,                     "TokenizeError") \
+        DECODE(MAIN_func_EXECUTION_ERROR,                    "ExecutionError") \
         \
         DECODE(CREATE_TOKEN_func_STREAM_OVERFLOW_ERROR,      "TokenStreamOverflowError") \
         \
@@ -86,17 +87,65 @@
         DECODE(PARSE_EXPR_MISSING_RPAREN,                                "MissingClosingParenthesis") \
         DECODE(PARSE_EXPR_MISSING_OPERAND,                               "MissingOperandAfterOperator") \
         \
-        DECODE(EXECUTE_func_UNDEFINED_STMT_TYPE,                         "UndefinedStatementType") \
+        DECODE(EXECUTE_func_UNDEFINED_STMT_TYPE,                         "UndefinedStatementTypeError") \
+        DECODE(EXECUTE_func_VAR_DECL_EXE_ERROR,                          "VariableDeclarationExecutionError") \
         \
         DECODE(EXECUTE_VAR_DECL_func_VAR_DECL_STMT_IS_NULL,               "VarDeclarationStatementIsNull") \
         DECODE(EXECUTE_VAR_DECL_func_INITIALIZER_IS_NULL,                 "InitializerIsNull") \
+        DECODE(EXECUTE_VAR_DECL_func_INITIALIZER_EVAL_ERROR,              "InitializerEvaluateError") \
         DECODE(EXECUTE_VAR_DECL_func_REDECLARATION_ERROR,                 "Re-DeclarationError") \
+        \
+        DECODE(EXECUTE_ASSIGNMENT_func_ASSIGN_STMT_IS_NULL,               "AssignmentStatementIsNull") \
+        DECODE(EXECUTE_ASSIGNMENT_func_ASSIGN_VAL_IS_NULL,                "AssignmentValueIsNull") \
+        DECODE(EXECUTE_ASSIGNMENT_func_UNDEFINED_VARIABLE,                "AssignmentToUndefinedVariable") \
+        DECODE(EXECUTE_ASSIGNMENT_func_CONST_REASSIGN,                    "ReassignmentOfConstVariable") \
+        DECODE(EXECUTE_ASSIGNMENT_func_EVAL_ERROR,                        "AssignmentValueEvalError") \
+        \
+        DECODE(EXECUTE_PRINT_func_PRINT_STMT_IS_NULL,                    "PrintStatementIsNull") \
+        DECODE(EXECUTE_PRINT_func_EXPRS_IS_NULL,                         "ExpressionsListIsNull") \
+        DECODE(EXECUTE_PRINT_func_PRINT_ARG_EVAL_ERROR,                  "PrintArgumentsEvaluateError") \
+        \
+        DECODE(EXECUTE_READ_func_READ_STMT_IS_NULL,                      "ReadStatementIsNull") \
+        DECODE(EXECUTE_READ_func_UNDEFINED_VARIABLE,                     "ReadToUndefinedVariable") \
+        DECODE(EXECUTE_READ_func_READ_INPUT_ERROR,                       "ReadInputError") \
+        \
+        DECODE(EXECUTE_IF_func_IF_STMT_IS_NULL,                          "IfStatementIsNull") \
+        DECODE(EXECUTE_IF_func_IF_COND_IS_NULL,                          "IfConditionIsNull") \
+        DECODE(EXECUTE_IF_func_IF_THAN_IS_NULL,                          "IfThanBranchIsNull") \
+        \
+        DECODE(EXECUTE_WHILE_func_WHLE_STMT_IS_NULL,                     "WhileStatementIsNull") \
+        DECODE(EXECUTE_WHILE_func_WHLE_COND_IS_NULL,                     "WhileConditionIsNull") \
+        DECODE(EXECUTE_WHILE_func_WHLE_BODY_IS_NULL,                     "WhileBodyIsNull") \
+        \
+        DECODE(EVAL_func_NON_EXIST_VAR_REFERENCE,                        "Non-ExistVariableReferenceError")\
+        DECODE(EVAL_funv_UNDEFINED_EXPR_TYPE,                            "UndefinedExpressionTypeError") \
+        \
+        DECODE(EVAL_VAL_func_UNDEFINED_VAR_TYPE,                         "UndefinedVariableTypeError") \
+        \
+        DECODE(EVAL_LITERAL_func_UNDEFIED_LIT_TYPE,                      "UndefinedLiteralTypeError") \
+        \
+        DECODE(EVAL_UNARY_func_OPERAND_EVAL_ERROR,                      "UnaryOperandEvalError") \
+        DECODE(EVAL_UNARY_func_NEGATE_NON_NUMERIC,                      "NegationOfNonNumericValue") \
+        DECODE(EVAL_UNARY_func_UNKNOWN_OPERATOR,                        "UnknownUnaryOperator") \
+        \
+        DECODE(EVAL_BINARY_func_LEFT_EVAL_ERROR,                        "BinaryLeftOperandEvalError") \
+        DECODE(EVAL_BINARY_func_RIGHT_EVAL_ERROR,                       "BinaryRightOperandEvalError") \
+        DECODE(EVAL_BINARY_func_TYPE_MISMATCH,                          "BinaryOperandTypeMismatch") \
+        DECODE(EVAL_BINARY_func_DIVISION_BY_ZERO,                       "DivisionByZeroError") \
+        DECODE(EVAL_BINARY_func_UNSUPPORTED_OP_FOR_TYPE,                "UnsupportedOperatorForType") \
+        DECODE(EVAL_BINARY_func_UNKNOWN_OPERATOR,                       "UnknownBinaryOperator") \
+        \
+        DECODE(VAR_SET_ERROR,                                           "VariableSetError") \
+        DECODE(HASHMAP_INIT_ERROR,                                      "FailedToInitializeHashMap") \
+        DECODE(INTERPRET_COND_ERROR,                                    "FailedToInterpretCondition") \
+        \
+        DECODE(EVAL_GROUPING_func_INNER_EVAL_ERROR,                     "GroupingExpressionEvalError") \
         \
         DECODE(CREATE_STMT_func_UNKNOWN_STMT_TYPE,                       "UnknownStatementType") \
         \
         DECODE(PARSING_func_MISSING_LPAREN_PRINT_ST_ERROR,   "MissingOpeningParenthesisError") \
         \
-        DECODE(PRINT_ADD_ARG_func_VARIABLE_NOT_EXIST_ERROR,  "VariableDoesNotExist") \
+        DECODE(PRINT_ADD_ARG_func_VARIABLE_NOT_EXIST_ERROR,  "VariableDoesNotExist") 
 
 
 /* generate enum for all kinds of warnings */        

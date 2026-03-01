@@ -2,6 +2,7 @@
 #include "lexer.h"
 #include "mem.h"
 #include "parser_api.h"
+#include "executor.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -114,6 +115,38 @@ static char* read_interactive(void)
     return program;
 }
 
+static bool process_error(int code)
+{
+    add_err_code(code, -1, false);
+    return 0;
+}
+
+static bool interprete(char * program)
+{
+    TOKEN_STREAM* stream = tokenize(program);
+    if(!stream)
+        return process_error(MAIN_func_TOKENIZE_ERROR);
+
+    program_t* ast = parse(stream);
+
+    //print_ast(ast);
+
+    if(!execute(ast))
+        return process_error(MAIN_func_EXECUTION_ERROR);
+
+    if(stream)
+    {
+        if(stream->tokens)
+            pli_free(stream->tokens);
+        pli_free(stream);
+    }
+
+    if(program)
+        pli_free(program);
+
+    return 1;
+}
+
 int main(int argc, char* argv[])
 {
     int ret = atexit_registration();
@@ -134,23 +167,7 @@ int main(int argc, char* argv[])
             exit(EXIT_FAILURE);
     }
 
-    TOKEN_STREAM* stream = tokenize(program);
-    if(!stream)
+    if(!interprete(program))
         exit(EXIT_FAILURE);
-
-    program_t* ast = parse(stream);
-
-    print_ast(ast);
-
-    if(stream)
-    {
-        if(stream->tokens)
-            pli_free(stream->tokens);
-        pli_free(stream);
-    }
-
-    if(program)
-        pli_free(program);
-
     exit(EXIT_SUCCESS);
 }

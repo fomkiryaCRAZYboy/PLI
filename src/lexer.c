@@ -262,7 +262,7 @@ char* get_text_token(char** line_ptr, int current_line)
     /* string literal handling: starts with " */
     if(*current == '"')
     {
-        text_token[iter++] = *current++;  /* add opening " */
+        current++;  /* skip opening " */
         
         /* read all characters until closing " */
         while(*current != '\0' && *current != '"' && iter < MAX_TOKEN_TEXT_SIZE)
@@ -278,7 +278,7 @@ char* get_text_token(char** line_ptr, int current_line)
             return NULL;
         }
         
-        /* closing quote no found */
+        /* closing quote not found */
         if(*current != '"')
         {
             add_err_code(GET_TEXT_TOKEN_func_QUOTE_NOT_FOUND_ERROR, current_line, false);
@@ -286,8 +286,7 @@ char* get_text_token(char** line_ptr, int current_line)
             return NULL;
         }
 
-        /* add closing quote */
-        text_token[iter++] = *current++;
+        current++;  /* skip closing " */
         
         text_token[iter] = '\0';
         *line_ptr = current;

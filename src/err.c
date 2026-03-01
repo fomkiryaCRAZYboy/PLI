@@ -73,10 +73,14 @@ void print_errors(void)
         }
         else
         {
-            printf(">>> Error   <code:%2hd> in line %hd: %s\n",
-                   errors_array[i].err_code, 
-                   errors_array[i].line_num, 
-                   decode_err(errors_array[i].err_code, false));
+            if(errors_array[i].line_num == -1)
+                printf(">>> Error   <code:%2hd>: %s\n",
+                    errors_array[i].err_code, 
+                    decode_err(errors_array[i].err_code, false));
+            else printf(">>> Error   <code:%2hd> in line %hd: %s\n",
+                    errors_array[i].err_code, 
+                    errors_array[i].line_num, 
+                    decode_err(errors_array[i].err_code, false));
         }
     }
 }
