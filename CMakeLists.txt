@@ -74,17 +74,11 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # collect source files into 'SOURCES'
 file(GLOB SOURCES LIST_DIRECTORIES false src/*.c)
-list(FILTER SOURCES EXCLUDE REGEX ".*/mem\\.c$")
+list(APPEND SOURCES src/memctl/mem.c)
 
-# add memory control library
-add_library(memctl SHARED src/memctl/mem.c)
-set_target_properties(memctl PROPERTIES OUTPUT_NAME memctl PREFIX "")
-target_include_directories(memctl PRIVATE include)
+# add library target - libpli
+add_library(pli ${SOURCES})
 
-# add executable target - pli
-add_executable(pli ${SOURCES})
-
-target_link_libraries(pli PRIVATE memctl)
 target_include_directories(pli PRIVATE include)
 
 add_custom_target(fullclean

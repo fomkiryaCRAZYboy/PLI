@@ -1,8 +1,10 @@
 #include "errs.h"
 #include "lexer.h"
 #include "mem.h"
+#include "parser.h"
 #include "parser_api.h"
 #include "executor.h"
+#include "main_head.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -147,6 +149,26 @@ static bool interprete(char * program)
     return 1;
 }
 
+/* special function that will be called in rust code */
+program_t* get_ast(char* program)
+{
+    TOKEN_STREAM* stream = tokenize(program);
+    if(!stream)
+        return error_handling(MAIN_func_TOKENIZE_ERROR,
+                              -1,
+                               false);
+
+    program_t* ast = parse(stream);
+    if(!ast)
+        return error_handling(MAIN_func_PARSE_ERROR,
+                              -1,
+                               false);
+
+    return ast;
+}
+
+/* target - libpli, without main() */
+#if 0
 int main(int argc, char* argv[])
 {
     int ret = atexit_registration();
@@ -171,3 +193,4 @@ int main(int argc, char* argv[])
         exit(EXIT_FAILURE);
     exit(EXIT_SUCCESS);
 }
+#endif

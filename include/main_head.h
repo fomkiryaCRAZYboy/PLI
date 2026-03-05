@@ -1,6 +1,8 @@
 #ifndef MAIN_HEAD_H
 #define MAIN_HEAD_H
 
-/* FILE_INPUT is controlled by CMake via -DFILE_INPUT=ON/OFF */
+#include "parser.h"
+
+program_t* get_ast(char* program);
 
 #endif /* MAIN_HEAD_H */

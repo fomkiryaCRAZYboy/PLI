@@ -16,6 +16,7 @@
         DECODE(MEMORY_ALLOCATION_ERROR,                      "MemoryAllocationError") \
         \
         DECODE(MAIN_func_TOKENIZE_ERROR,                     "TokenizeError") \
+        DECODE(MAIN_func_PARSE_ERROR,                     "ParseError") \
         DECODE(MAIN_func_EXECUTION_ERROR,                    "ExecutionError") \
         \
         DECODE(CREATE_TOKEN_func_STREAM_OVERFLOW_ERROR,      "TokenStreamOverflowError") \

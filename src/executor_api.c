@@ -259,6 +259,8 @@ bool execute_if(if_stmt_t* if_stmt, int line)
     return true;
 }
 
+/* the virtual machine does not need any execution functions */
+#if 0
 bool execute_while(while_stmt_t* while_stmt, int line)
 {
     if(!while_stmt)
@@ -287,3 +289,4 @@ bool execute_while(while_stmt_t* while_stmt, int line)
             return false;
     }
 }
+#endif
