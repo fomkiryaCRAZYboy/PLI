@@ -19,8 +19,7 @@ static bool execute_stmt(stmt_node_t *stmt)
         case STMT_IF:
             return execute_if(stmt->as.if_stmt, line);
         case STMT_WHILE:
-            /* TODO */
-            return true;
+            return execute_while(stmt -> as.while_stmt, line);
         case STMT_PRINT:
             return execute_print(stmt->as.print_stmt, line);
         case STMT_READ:

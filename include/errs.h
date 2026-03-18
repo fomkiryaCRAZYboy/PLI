@@ -113,9 +113,10 @@
         DECODE(EXECUTE_IF_func_IF_COND_IS_NULL,                          "IfConditionIsNull") \
         DECODE(EXECUTE_IF_func_IF_THAN_IS_NULL,                          "IfThanBranchIsNull") \
         \
-        DECODE(EXECUTE_WHILE_func_WHLE_STMT_IS_NULL,                     "WhileStatementIsNull") \
-        DECODE(EXECUTE_WHILE_func_WHLE_COND_IS_NULL,                     "WhileConditionIsNull") \
-        DECODE(EXECUTE_WHILE_func_WHLE_BODY_IS_NULL,                     "WhileBodyIsNull") \
+        DECODE(EXECUTE_WHILE_func_WHILE_STMT_IS_NULL,                     "WhileStatementIsNull") \
+        DECODE(EXECUTE_WHILE_func_WHILE_COND_IS_NULL,                     "WhileConditionIsNull") \
+        DECODE(EXECUTE_WHILE_func_WHILE_BODY_IS_NULL,                     "WhileBodyIsNull") \
+        DECODE(EXECUTE_WHILE_func_WHILE_COND_INTERPRETE_ERROR,            "FailedToInterpreteWhileCondition") \
         \
         DECODE(EVAL_func_NON_EXIST_VAR_REFERENCE,                        "Non-ExistVariableReferenceError")\
         DECODE(EVAL_funv_UNDEFINED_EXPR_TYPE,                            "UndefinedExpressionTypeError") \

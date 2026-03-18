@@ -137,11 +137,21 @@ static value_t* eval_binary(binary_expr_t* bin, int line)
         return result;
     }
 
-    /* Equality: works on any matching types */
+    /* Equality: works on any matching types; numeric cross-compare (int vs float) */
     if (bin->op == OP_EQUAL || bin->op == OP_NOT_EQUAL)
     {
         if (left->type != right->type)
         {
+            /* int vs float: compare as numbers (e.g. 0 == 0.0) */
+            if ((left->type == VAL_INT || left->type == VAL_FLOAT) &&
+                (right->type == VAL_INT || right->type == VAL_FLOAT))
+            {
+                double lv = (left->type  == VAL_FLOAT) ? left->value.float_val  : (double)left->value.int_val;
+                double rv = (right->type == VAL_FLOAT) ? right->value.float_val : (double)right->value.int_val;
+                result->type = VAL_BOOL;
+                result->value.bool_val = (bin->op == OP_EQUAL) ? (lv == rv) : (lv != rv);
+                return result;
+            }
             result->type = VAL_BOOL;
             result->value.bool_val = (bin->op == OP_NOT_EQUAL);
             return result;
@@ -200,14 +210,17 @@ static value_t* eval_binary(binary_expr_t* bin, int line)
             result->value.float_val = lv / rv;
             break;
         case OP_MODULO:
-            if (right->value.int_val == 0 && right->type == VAL_INT)
+        {
+            int64_t ri = (int64_t)rv;
+            if (ri == 0)
             {
                 pli_free(result);
                 return error_handling(EVAL_BINARY_func_DIVISION_BY_ZERO, line, false);
             }
             result->type = VAL_INT;
-            result->value.int_val = left->value.int_val % right->value.int_val;
+            result->value.int_val = (int64_t)lv % ri;
             break;
+        }
 
         /* Comparison */
         case OP_LESS:          result->type = VAL_BOOL; result->value.bool_val = lv <  rv; break;

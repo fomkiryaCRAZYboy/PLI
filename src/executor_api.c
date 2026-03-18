@@ -262,28 +262,36 @@ bool execute_if(if_stmt_t* if_stmt, int line)
 bool execute_while(while_stmt_t* while_stmt, int line)
 {
     if(!while_stmt)
-        process_error(EXECUTE_IF_func_IF_STMT_IS_NULL,
+        process_error(EXECUTE_WHILE_func_WHILE_STMT_IS_NULL,
                         line,
                          false);
         
     if(!while_stmt->condition)
-        process_error(EXECUTE_WHILE_func_WHLE_COND_IS_NULL,
+        process_error(EXECUTE_WHILE_func_WHILE_COND_IS_NULL,
                         line,
                          false);
 
     if(!while_stmt->body)
-    process_error(EXECUTE_WHILE_func_WHLE_BODY_IS_NULL,
-                    line,
-                     false);
+        process_error(EXECUTE_WHILE_func_WHILE_BODY_IS_NULL,
+                        line,
+                        false);
 
     value_t *cond = NULL;
 
-    while()
+ITERATION:
+    cond = interprete_condition(while_stmt->condition, line);
+    if (!cond)
+        process_error(EXECUTE_WHILE_func_WHILE_COND_INTERPRETE_ERROR,
+                        line,
+                         false);
 
-    do
+    if(cond->value.bool_val == true)
     {
-        cond = interprete_condition(while_stmt->condition, line);
-        if (!cond)
+        if(!execute_block(while_stmt -> body, line))
             return false;
+
+        goto ITERATION;
     }
+    else return true;
+ 
 }
