@@ -1,8 +1,55 @@
 #include "errs.h"
-#include "lexer.h"
 #include "mem.h"
+#include "parser.h"
 #include "parser_api.h"
 #include "executor.h"
+
+static bool process_error(int code)
+{
+    add_err_code(code, -1, false);
+    return 0;
+}
+
+#ifdef LIBPLI
+#include "main_head.h"
+program_t* get_ast(char* program)
+{
+    TOKEN_STREAM* stream  = NULL;
+    program_t*   ast      = NULL;
+    bool         exec_ok  = false;
+
+    stream = tokenize(program);
+    if(!stream)
+    {
+        process_error(MAIN_func_TOKENIZE_ERROR);
+        goto cleanup;
+    }
+
+    ast = parse(stream);
+    if(!ast)
+        goto cleanup;
+
+    return ast;
+
+cleanup:
+    if(stream)
+    {
+        if(stream->tokens)
+            pli_free(stream->tokens);
+        pli_free(stream);
+    }
+
+    if(ast)
+        free_program(ast);
+
+    if(program)
+        pli_free(program);
+
+    return NULL;
+}
+
+#else
+
 #include "var.h"
 
 #include <stdio.h>
@@ -116,12 +163,6 @@ static char* read_interactive(void)
     return program;
 }
 
-static bool process_error(int code)
-{
-    add_err_code(code, -1, false);
-    return 0;
-}
-
 static bool interprete(char * program)
 {
     TOKEN_STREAM* stream  = NULL;
@@ -190,3 +231,5 @@ int main(int argc, char* argv[])
         exit(EXIT_FAILURE);
     exit(EXIT_SUCCESS);
 }
+
+#endif

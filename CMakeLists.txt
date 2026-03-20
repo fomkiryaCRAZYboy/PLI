@@ -23,6 +23,11 @@
 # cmake .. -DFILE_INPUT=ON  /  cmake .. -DFILE_INPUT=OFF   (default is OFF)
 # cmake --build . --target pli -v
 
+# embeddable shared library (get_ast API, see #ifdef LIBPLI in main.c):
+
+# cmake .. -DLIBPLI=ON
+# cmake --build . --target libpli
+
 
 # static analyze:
 
@@ -56,7 +61,7 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
-# FILE_INPUT removed: pli now accepts file path as argv[1]
+option(LIBPLI "Build libpli shared library (get_ast); defines LIBPLI for main.c" OFF)
 
 set(TIDY_CHECKS
     "performance-*"
@@ -86,6 +91,24 @@ add_executable(pli ${SOURCES})
 
 target_link_libraries(pli PRIVATE memctl)
 target_include_directories(pli PRIVATE include)
+
+if(LIBPLI)
+    add_library(libpli SHARED
+        src/err.c
+        src/memctl/mem.c
+        src/main.c
+        src/lexer.c
+        src/parser.c
+        src/parser_api.c
+        src/parse_expr.c
+        src/ast_free.c
+    )
+    target_compile_definitions(libpli PRIVATE LIBPLI=1)
+    target_include_directories(libpli PUBLIC ${CMAKE_SOURCE_DIR}/include)
+    set_target_properties(libpli PROPERTIES OUTPUT_NAME pli)
+
+    message(STATUS "LIBPLI: single shared library lib/libpli.so (get_ast + lexer/parser)")
+endif()
 
 add_custom_target(fullclean
     COMMAND ${CMAKE_COMMAND} -E echo "Removing build configuration..."
@@ -121,3 +144,4 @@ endforeach()
 
 message(STATUS "Parallel level: ${NUM_PROCESSORS}")
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+message(STATUS "LIBPLI: ${LIBPLI}")
