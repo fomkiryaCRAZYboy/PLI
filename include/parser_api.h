@@ -5,6 +5,7 @@
 #include "lexer.h"
 
 program_t* parse(TOKEN_STREAM* stream);
+void free_program(program_t* program);
 stmt_node_t* create_stmt(void* any_stmt, stmt_type_t type, int line_num);
 var_decl_stmt_t* create_var_decl_stmt(TOKEN_STREAM* stream, int* pos);
 assignment_stmt_t* create_assignment_stmt(TOKEN_STREAM* stream, int* pos);

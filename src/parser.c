@@ -180,9 +180,12 @@ program_t* parse(TOKEN_STREAM* stream)
         line = safe_line(stream, pos);
 
         if(!stmt)
+        {
+            free_program(program);
             return error_handling(PARSE_func_STMT_CREATION_ERROR,
                                   line,
                                    false);
+        }
         else
             add_stmt_to_list(stmt, program);
     }    

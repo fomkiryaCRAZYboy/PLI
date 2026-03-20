@@ -51,6 +51,7 @@ static value_t* eval_unary(unary_expr_t* un, int line)
             else
             {
                 pli_free(result);
+                pli_free(operand);
                 return error_handling(EVAL_UNARY_func_NEGATE_NON_NUMERIC,
                                       line, false);
             }
@@ -66,10 +67,12 @@ static value_t* eval_unary(unary_expr_t* un, int line)
 
         default:
             pli_free(result);
+            pli_free(operand);
             return error_handling(EVAL_UNARY_func_UNKNOWN_OPERATOR,
                                   line, false);
     }
 
+    pli_free(operand);
     return result;
 }
 
@@ -97,21 +100,34 @@ static value_t* eval_binary(binary_expr_t* bin, int line)
         {
             value_t *result = pli_alloc(sizeof(value_t));
             if (!result)
+            {
+                pli_free(left);
                 return error_handling(MEMORY_ALLOCATION_ERROR, line, false);
+            }
             result->type = VAL_BOOL;
             result->value.bool_val = left_truthy;
+            pli_free(left);
             return result;
         }
 
         value_t *right = eval(bin->right);
         if (!right)
+        {
+            pli_free(left);
             return error_handling(EVAL_BINARY_func_RIGHT_EVAL_ERROR, line, false);
+        }
 
         value_t *result = pli_alloc(sizeof(value_t));
         if (!result)
+        {
+            pli_free(left);
+            pli_free(right);
             return error_handling(MEMORY_ALLOCATION_ERROR, line, false);
+        }
         result->type = VAL_BOOL;
         result->value.bool_val = is_truthy(right);
+        pli_free(left);
+        pli_free(right);
         return result;
     }
 
@@ -121,11 +137,18 @@ static value_t* eval_binary(binary_expr_t* bin, int line)
 
     value_t *right = eval(bin->right);
     if (!right)
+    {
+        pli_free(left);
         return error_handling(EVAL_BINARY_func_RIGHT_EVAL_ERROR, line, false);
+    }
 
     value_t *result = pli_alloc(sizeof(value_t));
     if (!result)
+    {
+        pli_free(left);
+        pli_free(right);
         return error_handling(MEMORY_ALLOCATION_ERROR, line, false);
+    }
 
     /* String concatenation: "abc" + "def" */
     if (bin->op == OP_ADD && left->type == VAL_STRING && right->type == VAL_STRING)
@@ -134,6 +157,8 @@ static value_t* eval_binary(binary_expr_t* bin, int line)
         strncpy(result->value.string_val, left->value.string_val, MAX_STR_SIZE - 1);
         strncat(result->value.string_val, right->value.string_val,
                 MAX_STR_SIZE - 1 - strlen(result->value.string_val));
+        pli_free(left);
+        pli_free(right);
         return result;
     }
 
@@ -150,10 +175,14 @@ static value_t* eval_binary(binary_expr_t* bin, int line)
                 double rv = (right->type == VAL_FLOAT) ? right->value.float_val : (double)right->value.int_val;
                 result->type = VAL_BOOL;
                 result->value.bool_val = (bin->op == OP_EQUAL) ? (lv == rv) : (lv != rv);
+                pli_free(left);
+                pli_free(right);
                 return result;
             }
             result->type = VAL_BOOL;
             result->value.bool_val = (bin->op == OP_NOT_EQUAL);
+            pli_free(left);
+            pli_free(right);
             return result;
         }
 
@@ -169,6 +198,8 @@ static value_t* eval_binary(binary_expr_t* bin, int line)
 
         result->type = VAL_BOOL;
         result->value.bool_val = (bin->op == OP_EQUAL) ? equal : !equal;
+        pli_free(left);
+        pli_free(right);
         return result;
     }
 
@@ -177,6 +208,8 @@ static value_t* eval_binary(binary_expr_t* bin, int line)
         (right->type != VAL_INT && right->type != VAL_FLOAT))
     {
         pli_free(result);
+        pli_free(left);
+        pli_free(right);
         return error_handling(EVAL_BINARY_func_UNSUPPORTED_OP_FOR_TYPE, line, false);
     }
 
@@ -204,6 +237,8 @@ static value_t* eval_binary(binary_expr_t* bin, int line)
             if (rv == 0.0)
             {
                 pli_free(result);
+                pli_free(left);
+                pli_free(right);
                 return error_handling(EVAL_BINARY_func_DIVISION_BY_ZERO, line, false);
             }
             result->type = VAL_FLOAT;
@@ -215,6 +250,8 @@ static value_t* eval_binary(binary_expr_t* bin, int line)
             if (ri == 0)
             {
                 pli_free(result);
+                pli_free(left);
+                pli_free(right);
                 return error_handling(EVAL_BINARY_func_DIVISION_BY_ZERO, line, false);
             }
             result->type = VAL_INT;
@@ -230,9 +267,13 @@ static value_t* eval_binary(binary_expr_t* bin, int line)
 
         default:
             pli_free(result);
+            pli_free(left);
+            pli_free(right);
             return error_handling(EVAL_BINARY_func_UNKNOWN_OPERATOR, line, false);
     }
 
+    pli_free(left);
+    pli_free(right);
     return result;
 }
 
@@ -259,6 +300,7 @@ static value_t* eval_literal(literal_expr_t* l, int line)
             strncpy(val->value.string_val, l->value.string, MAX_STR_SIZE);
             break;
         default:
+            pli_free(val);
             return error_handling(EVAL_LITERAL_func_UNDEFIED_LIT_TYPE,
                                   line,
                                    false);
@@ -302,6 +344,7 @@ static value_t* eval_var(variable_t* v, int line)
             break;
         }
         case VAL_NONE: default:
+            pli_free(val);
             return error_handling(EVAL_VAL_func_UNDEFINED_VAR_TYPE,
                                   line,
                                    false);

@@ -129,6 +129,14 @@ void hashmap_free(hashmap *map)
     pli_free(map);
 }
 
+void pli_runtime_cleanup(void)
+{
+    if (!global_map)
+        return;
+    hashmap_free(global_map);
+    global_map = NULL;
+}
+
 /* Insert or update a variable. Returns false on allocation failure. */
 bool hashmap_set(hashmap *map, const char *name, value_t val, bool is_const)
 {

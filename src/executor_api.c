@@ -1,6 +1,7 @@
 #include "executor.h"
 #include "parser.h"
 #include "errs.h"
+#include "mem.h"
 #include "parser_api.h"
 #include "var.h"
 
@@ -46,6 +47,7 @@ bool execute_var_decl(var_decl_stmt_t* var_decl_stmt, int line)
     if (!hashmap_set(global_map, var_decl_stmt->var_name, *val, false))
         process_error(VAR_SET_ERROR, line, false);
 
+    pli_free(val);
     return true;
 }
 
@@ -73,6 +75,7 @@ bool execute_assignment(assignment_stmt_t* assign_stmt, int line)
         process_error(EXECUTE_ASSIGNMENT_func_EVAL_ERROR, line, false);
 
     var->value = *val;
+    pli_free(val);
 
     return true;
 }
@@ -133,6 +136,7 @@ bool execute_print(print_stmt_t* print_stmt, int line)
 
         bool line_break = print_stmt -> expressions[i + 1] ? false : true;
         print_value(v, line_break);
+        pli_free(v);
 
         --exprs_count, ++i;
     }
@@ -247,14 +251,18 @@ bool execute_if(if_stmt_t* if_stmt, int line)
 
     if (cond->value.bool_val)
     {
+        pli_free(cond);
         if (!execute_block(if_stmt->then_branch, line))
             return false;
     }
     else if (if_stmt->else_branch)
     {
+        pli_free(cond);
         if (!execute_block(if_stmt->else_branch, line))
             return false;
     }
+    else
+        pli_free(cond);
 
     return true;
 }
@@ -287,11 +295,14 @@ ITERATION:
 
     if(cond->value.bool_val == true)
     {
+        pli_free(cond);
+        cond = NULL;
         if(!execute_block(while_stmt -> body, line))
             return false;
 
         goto ITERATION;
     }
-    else return true;
+    pli_free(cond);
+    return true;
  
 }

@@ -64,6 +64,9 @@ uint32_t    var_hash_function(const char *varname);
 
 hashmap    *hashmap_new(void);
 void        hashmap_free(hashmap *map);
+
+/* Free global variable table (call after program execution or on error). */
+void        pli_runtime_cleanup(void);
 bool        hashmap_set(hashmap *map, const char *name, value_t val, bool is_const);
 variable_t *hashmap_lookup(hashmap *map, const char *name);
 bool        hashmap_delete(hashmap *map, const char *name);

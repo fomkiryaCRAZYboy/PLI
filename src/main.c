@@ -3,6 +3,7 @@
 #include "mem.h"
 #include "parser_api.h"
 #include "executor.h"
+#include "var.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -123,16 +124,31 @@ static bool process_error(int code)
 
 static bool interprete(char * program)
 {
-    TOKEN_STREAM* stream = tokenize(program);
+    TOKEN_STREAM* stream  = NULL;
+    program_t*   ast      = NULL;
+    bool         exec_ok  = false;
+
+    stream = tokenize(program);
     if(!stream)
-        return process_error(MAIN_func_TOKENIZE_ERROR);
+    {
+        process_error(MAIN_func_TOKENIZE_ERROR);
+        goto cleanup;
+    }
 
-    program_t* ast = parse(stream);
-
-    //print_ast(ast);
+    ast = parse(stream);
+    if(!ast)
+        goto cleanup;
 
     if(!execute(ast))
-        return process_error(MAIN_func_EXECUTION_ERROR);
+    {
+        process_error(MAIN_func_EXECUTION_ERROR);
+        goto cleanup;
+    }
+
+    exec_ok = true;
+
+cleanup:
+    pli_runtime_cleanup();
 
     if(stream)
     {
@@ -141,10 +157,13 @@ static bool interprete(char * program)
         pli_free(stream);
     }
 
+    if(ast)
+        free_program(ast);
+
     if(program)
         pli_free(program);
 
-    return 1;
+    return exec_ok;
 }
 
 int main(int argc, char* argv[])
