@@ -362,101 +362,100 @@ f_result create_token(TOKEN_TYPE token_type, char* token_text, TOKEN_STREAM* str
     return SUCCESS ;
 }
 
-/* 
-Helper function to process token: get token text, create token, handle errors
-Returns: SUCCESS on success, error code on failure
-On failure, returns error code (cleanup is done by caller via goto clean)
+/*
+Each of the process_*_token helpers below performs the same 4 steps:
+
+    1. read raw token text from the source           (get_*_token)
+    2. resolve concrete TOKEN_TYPE for that text     (only where it is not fixed)
+    3. append the resulting token to the stream      (create_token)
+    4. release the temporary text buffer
+
+On failure on step 1 or 3 the helper records the corresponding error code
+and returns it; the caller (tokenize) interprets a non-SUCCESS return as a
+signal to stop tokenization and clean the stream up via `goto clean`.
+
+The helpers share the same signature so that the main loop stays uniform.
 */
-static f_result process_token(
-    char* (*get_token_func)(char**, int),
-    TOKEN_TYPE token_type,
-    char** line_ptr,
-    int current_line,
-    TOKEN_STREAM* stream,
-    int get_token_error_code,
-    int create_token_error_code)
+
+static f_result process_number_token(char** line_ptr, int current_line, TOKEN_STREAM* stream)
 {
-    char* token_text = get_token_func(line_ptr, current_line);
+    char* token_text = get_number_token(line_ptr, current_line);
     if(!token_text)
     {
-        add_err_code(get_token_error_code, current_line, false);
-        return get_token_error_code;
+        add_err_code(TOKENIZE_func_GET_NUMBER_TOKEN_ERROR, current_line, false);
+        return TOKENIZE_func_GET_NUMBER_TOKEN_ERROR;
     }
 
-    if(create_token(token_type, token_text, stream, current_line) != SUCCESS)
-    {
-        add_err_code(create_token_error_code, current_line, false);
-        pli_free(token_text);
-        return create_token_error_code;
-    }
-
+    f_result status = create_token(num_token, token_text, stream, current_line);
     pli_free(token_text);
+
+    if(status != SUCCESS)
+    {
+        add_err_code(TOKENIZE_func_NUM_TOKEN_CREATION_ERROR, current_line, false);
+        return TOKENIZE_func_NUM_TOKEN_CREATION_ERROR;
+    }
     return SUCCESS;
 }
 
-/* 
-Helper function to process text tokens (identifiers, keywords, booleans):
-get token text, identify type, create token, handle errors
-Returns: SUCCESS on success, error code on failure
-On failure, returns error code (cleanup is done by caller via goto clean)
-*/
-static f_result process_text_token(
-    char** line_ptr,
-    int current_line,
-    TOKEN_STREAM* stream,
-    int get_token_error_code,
-    int create_token_error_code)
+static f_result process_string_token(char** line_ptr, int current_line, TOKEN_STREAM* stream)
 {
     char* token_text = get_text_token(line_ptr, current_line);
     if(!token_text)
     {
-        add_err_code(get_token_error_code, current_line, false);
-        return get_token_error_code;
+        add_err_code(TOKENIZE_func_GET_STR_TOKEN_ERROR, current_line, false);
+        return TOKENIZE_func_GET_STR_TOKEN_ERROR;
     }
 
-    TOKEN_TYPE token_type = text_to_token_type(token_text);
-
-    if(create_token(token_type, token_text, stream, current_line) != SUCCESS)
-    {
-        add_err_code(create_token_error_code, current_line, false);
-        pli_free(token_text);
-        return create_token_error_code;
-    }
-
+    f_result status = create_token(str_token, token_text, stream, current_line);
     pli_free(token_text);
+
+    if(status != SUCCESS)
+    {
+        add_err_code(TOKENIZE_func_STRING_TOKEN_CREATION_ERROR, current_line, false);
+        return TOKENIZE_func_STRING_TOKEN_CREATION_ERROR;
+    }
     return SUCCESS;
 }
 
-/* 
-Helper function to process operator/separator tokens:
-get token text, identify type, create token, handle errors
-Returns: SUCCESS on success, error code on failure
-On failure, returns error code (cleanup is done by caller via goto clean)
-*/
-static f_result process_operator_token(
-    char** line_ptr,
-    int current_line,
-    TOKEN_STREAM* stream,
-    int get_token_error_code,
-    int create_token_error_code)
+static f_result process_text_token(char** line_ptr, int current_line, TOKEN_STREAM* stream)
+{
+    char* token_text = get_text_token(line_ptr, current_line);
+    if(!token_text)
+    {
+        add_err_code(TOKENIZE_func_GET_TEXT_TOKEN_ERROR, current_line, false);
+        return TOKENIZE_func_GET_TEXT_TOKEN_ERROR;
+    }
+
+    TOKEN_TYPE token_type = text_to_token_type(token_text);
+    f_result   status     = create_token(token_type, token_text, stream, current_line);
+    pli_free(token_text);
+
+    if(status != SUCCESS)
+    {
+        add_err_code(TOKENIZE_func_TEXT_TOKEN_CREATION_ERROR, current_line, false);
+        return TOKENIZE_func_TEXT_TOKEN_CREATION_ERROR;
+    }
+    return SUCCESS;
+}
+
+static f_result process_operator_token(char** line_ptr, int current_line, TOKEN_STREAM* stream)
 {
     char* token_text = get_op_sep_token(line_ptr, current_line);
     if(!token_text)
     {
-        add_err_code(get_token_error_code, current_line, false);
-        return get_token_error_code;
+        add_err_code(TOKENIZE_func_GET_SEP_OP_TOKEN_ERROR, current_line, false);
+        return TOKENIZE_func_GET_SEP_OP_TOKEN_ERROR;
     }
 
     TOKEN_TYPE token_type = operator_to_token_type(token_text);
-
-    if(create_token(token_type, token_text, stream, current_line) != SUCCESS)
-    {
-        add_err_code(create_token_error_code, current_line, false);
-        pli_free(token_text);
-        return create_token_error_code;
-    }
-
+    f_result   status     = create_token(token_type, token_text, stream, current_line);
     pli_free(token_text);
+
+    if(status != SUCCESS)
+    {
+        add_err_code(TOKENIZE_func_SEP_OP_TOKEN_CREATION_ERROR, current_line, false);
+        return TOKENIZE_func_SEP_OP_TOKEN_CREATION_ERROR;
+    }
     return SUCCESS;
 }
 
@@ -504,61 +503,33 @@ TOKEN_STREAM* tokenize(char* block)
         if(*line_ptr == '\0') 
             break; 
 
-        /* numbers handling */  
-        if(isdigit (*line_ptr)) 
-        {
-            if(process_token(get_number_token, num_token, &line_ptr, current_line, stream,
-                           TOKENIZE_func_GET_NUMBER_TOKEN_ERROR,
-                           TOKENIZE_func_NUM_TOKEN_CREATION_ERROR) != SUCCESS)
-            {
-                goto clean;
-            }
-        }
+        f_result step;
 
-        /* string literals handling */
+        /* numeric literals: 42, 3.14, ... */
+        if(isdigit(*line_ptr))
+            step = process_number_token(&line_ptr, current_line, stream);
+
+        /* string literals: "hello" */
         else if(*line_ptr == '"')
-        {
-            if(process_token(get_text_token, str_token, &line_ptr, current_line, stream,
-                           TOKENIZE_func_GET_STR_TOKEN_ERROR,
-                           TOKENIZE_func_STRING_TOKEN_CREATION_ERROR) != SUCCESS)
-            {
-                goto clean;
-            }
-        }
+            step = process_string_token(&line_ptr, current_line, stream);
 
-        /* true/_name/print */
-        /* bool values/identifers/keywords handling */
-        else if(isalpha (*line_ptr) || *line_ptr == '_')
-        {
-            if(process_text_token(&line_ptr, current_line, stream,
-                                 TOKENIZE_func_GET_TEXT_TOKEN_ERROR,
-                                 TOKENIZE_func_TEXT_TOKEN_CREATION_ERROR) != SUCCESS)
-            {
-                goto clean;
-            }
-        }
+        /* identifiers, keywords, booleans: x, my_var, while, true, ... */
+        else if(isalpha(*line_ptr) || *line_ptr == '_')
+            step = process_text_token(&line_ptr, current_line, stream);
 
-        /* separators and operations handling */
+        /* operators and separators: +, -, ==, (, }, ... */
         else
-        {
-            if(process_operator_token(&line_ptr, current_line, stream, 
-                                     TOKENIZE_func_GET_SEP_OP_TOKEN_ERROR,
-                                     TOKENIZE_func_SEP_OP_TOKEN_CREATION_ERROR) != SUCCESS)
-            {
-                goto clean;
-            }
-        }
+            step = process_operator_token(&line_ptr, current_line, stream);
 
+        if(step != SUCCESS)
+            goto clean;
     }
 
     stream->current_line = current_line;
     return stream;
 
 clean:
-    if(stream)
-    {
-        pli_free(stream->tokens);
-        pli_free(stream);
-    }
+    pli_free(stream->tokens);
+    pli_free(stream);
     return NULL;
 }
